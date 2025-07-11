@@ -80,7 +80,6 @@ export const eventsToOrganisers = sqliteTable(
 	}),
 );
 
-// Junction table to link Users to Events as Participants
 export const eventParticipants = sqliteTable(
 	"event_participants",
 	{
@@ -90,8 +89,42 @@ export const eventParticipants = sqliteTable(
 		userId: integer("user_id")
 			.notNull()
 			.references(() => users.id, { onDelete: "cascade" }),
+		teamId: integer("team_id").references(() => eventTeams.id, {
+			onDelete: "set null",
+		}), // Updated reference here
 	},
 	(t) => ({ pk: primaryKey({ columns: [t.eventId, t.userId] }) }),
+);
+
+export const eventTeams = sqliteTable("event_teams", {
+	id: integer("id").primaryKey({ autoIncrement: true }),
+	name: text("name").notNull(),
+	eventId: integer("event_id")
+		.notNull()
+		.references(() => events.id, { onDelete: "cascade" }),
+	createdAt: integer("created_at", { mode: "timestamp" })
+		.default(sql`CURRENT_TIMESTAMP`)
+		.notNull(),
+});
+
+// Junction table to link Users to Events as Participants
+export const eventParticipantsRelations = relations(
+	eventParticipants,
+	({ one }) => ({
+		event: one(events, {
+			fields: [eventParticipants.eventId],
+			references: [events.id],
+		}),
+		user: one(users, {
+			fields: [eventParticipants.userId],
+			references: [users.id],
+		}),
+		team: one(eventTeams, {
+			// Updated relation to point to `eventTeams`
+			fields: [eventParticipants.teamId],
+			references: [eventTeams.id],
+		}),
+	}),
 );
 
 // Junction table to link Users to Events as Judges
@@ -122,6 +155,17 @@ export const organiserRelations = relations(organisers, ({ many }) => ({
 export const eventRelations = relations(events, ({ many }) => ({
 	eventPhotos: many(eventPhotos),
 	eventsToOrganisers: many(eventsToOrganisers),
+	participants: many(eventParticipants),
+	judges: many(eventJudges),
+	teams: many(eventTeams),
+}));
+
+export const eventTeamRelations = relations(eventTeams, ({ one, many }) => ({
+	event: one(events, {
+		fields: [eventTeams.eventId],
+		references: [events.id],
+	}),
+	members: many(eventParticipants),
 }));
 
 export const eventPhotoRelations = relations(eventPhotos, ({ one }) => ({
