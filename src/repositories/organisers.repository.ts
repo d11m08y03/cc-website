@@ -2,8 +2,8 @@ import type { DrizzleD1Database } from "drizzle-orm/d1";
 import { eq } from "drizzle-orm";
 import * as schema from "@/db/schema";
 
-type Organiser = typeof schema.organisers.$inferSelect;
-type NewOrganiser = typeof schema.organisers.$inferInsert;
+export type Organiser = typeof schema.organisers.$inferSelect;
+export type NewOrganiser = typeof schema.organisers.$inferInsert;
 type DB = DrizzleD1Database<typeof schema>;
 
 export class OrganiserRepository {

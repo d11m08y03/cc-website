@@ -3,7 +3,7 @@ import { eq, and } from "drizzle-orm";
 import * as schema from "@/db/schema";
 
 type Log = typeof schema.appLogs.$inferSelect;
-type NewLog = typeof schema.appLogs.$inferInsert;
+export type NewLog = typeof schema.appLogs.$inferInsert;
 type DB = DrizzleD1Database<typeof schema>;
 
 export class AppLogRepository {
