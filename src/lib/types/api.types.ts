@@ -1,28 +1,39 @@
-export type ApiErrorCode = 
-  | 'BAD_REQUEST'
-  | 'UNAUTHORIZED'
-  | 'FORBIDDEN'
-  | 'NOT_FOUND'
-  | 'CONFLICT'
-  | 'INTERNAL_SERVER_ERROR';
+export type ApiErrorCode =
+	| "BAD_REQUEST"
+	| "UNAUTHORIZED"
+	| "FORBIDDEN"
+	| "NOT_FOUND"
+	| "CONFLICT"
+	| "INTERNAL_SERVER_ERROR"
+	| "USER_NOT_FOUND"
+	| "EVENT_NOT_FOUND"
+	| "TEAM_ALREADY_EXISTS"
+	| "TEAM_NOT_FOUND"
+	| "ORGANISER_NOT_FOUND"
+	| "ORGANISER_NOT_ASSIGNED"
+	| "JUDGE_NOT_ASSIGNED"
+	| "ORGANISER_ALREADY_ASSIGNED"
+	| "JUDGE_ALREADY_ASSIGNED"
+	| "PARTICIPANT_NOT_FOUND"
+	| "ALREADY_REGISTERED";
 
 /**
  * The standard structure for a successful API response.
  */
 type SuccessResponse<T> = {
-  success: true;
-  data: T;
+	success: true;
+	data: T;
 };
 
 /**
  * The standard structure for a failed API response.
  */
 type ErrorResponse = {
-  success: false;
-  error: {
-    message: string;
-    code: ApiErrorCode;
-  };
+	success: false;
+	error: {
+		message: string;
+		code: ApiErrorCode;
+	};
 };
 
 /**
