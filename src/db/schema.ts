@@ -8,7 +8,10 @@ import {
 import { relations, sql } from "drizzle-orm";
 
 export const appLogs = sqliteTable("app_logs", {
-	id: integer("id").primaryKey({ autoIncrement: true }),
+	id: text("id")
+		.primaryKey()
+		.notNull()
+		.default(sql`(lower(hex(randomblob(16))))`),
 	timestamp: integer("timestamp", { mode: "timestamp" })
 		.default(sql`CURRENT_TIMESTAMP`)
 		.notNull(),
@@ -23,9 +26,14 @@ export const appLogs = sqliteTable("app_logs", {
 });
 
 export const users = sqliteTable("users", {
-	id: integer("id").primaryKey({ autoIncrement: true }),
+	id: text("id")
+		.primaryKey()
+		.notNull()
+		.default(sql`(lower(hex(randomblob(16))))`),
 	name: text("name").notNull(),
 	email: text("email").notNull(),
+	emailVerified: integer("email_verified", { mode: "timestamp_ms" }),
+	image: text("image"),
 	hashedPassword: text("hashed_password"),
 	isAdmin: int("is_admin", { mode: "boolean" }).default(false).notNull(),
 	createdAt: integer("created_at", { mode: "timestamp" })
@@ -33,8 +41,80 @@ export const users = sqliteTable("users", {
 		.notNull(),
 });
 
+export const accounts = sqliteTable(
+	"account",
+	{
+		userId: text("userId")
+			.notNull()
+			.references(() => users.id, { onDelete: "cascade" }),
+		type: text("type").notNull(),
+		provider: text("provider").notNull(),
+		providerAccountId: text("providerAccountId").notNull(),
+		refresh_token: text("refresh_token"),
+		access_token: text("access_token"),
+		expires_at: integer("expires_at"),
+		token_type: text("token_type"),
+		scope: text("scope"),
+		id_token: text("id_token"),
+		session_state: text("session_state"),
+	},
+	(account) => ({
+		compoundKey: primaryKey({
+			columns: [account.provider, account.providerAccountId],
+		}),
+	}),
+);
+
+export const verificationTokens = sqliteTable(
+	"verification_token",
+	{
+		identifier: text("identifier").notNull(),
+		token: text("token").notNull(),
+		expires: integer("expires", { mode: "timestamp_ms" }).notNull(),
+	},
+	(verificationToken) => ({
+		compositePk: primaryKey({
+			columns: [verificationToken.identifier, verificationToken.token],
+		}),
+	}),
+);
+
+export const authenticators = sqliteTable(
+	"authenticator",
+	{
+		credentialID: text("credentialID").notNull().unique(),
+		userId: text("userId")
+			.notNull()
+			.references(() => users.id, { onDelete: "cascade" }),
+		providerAccountId: text("providerAccountId").notNull(),
+		credentialPublicKey: text("credentialPublicKey").notNull(),
+		counter: integer("counter").notNull(),
+		credentialDeviceType: text("credentialDeviceType").notNull(),
+		credentialBackedUp: integer("credentialBackedUp", {
+			mode: "boolean",
+		}).notNull(),
+		transports: text("transports"),
+	},
+	(authenticator) => ({
+		compositePK: primaryKey({
+			columns: [authenticator.userId, authenticator.credentialID],
+		}),
+	}),
+);
+
+export const sessions = sqliteTable("session", {
+	sessionToken: text("sessionToken").primaryKey(),
+	userId: text("userId")
+		.notNull()
+		.references(() => users.id, { onDelete: "cascade" }),
+	expires: integer("expires", { mode: "timestamp_ms" }).notNull(),
+});
+
 export const organisers = sqliteTable("organisers", {
-	id: integer("id").primaryKey({ autoIncrement: true }),
+	id: text("id")
+		.primaryKey()
+		.notNull()
+		.default(sql`(lower(hex(randomblob(16))))`),
 	name: text("name").notNull(),
 	profilePicUrl: text("profile_pic_url"),
 	createdAt: integer("created_at", { mode: "timestamp" })
@@ -43,7 +123,10 @@ export const organisers = sqliteTable("organisers", {
 });
 
 export const events = sqliteTable("events", {
-	id: integer("id").primaryKey({ autoIncrement: true }),
+	id: text("id")
+		.primaryKey()
+		.notNull()
+		.default(sql`(lower(hex(randomblob(16))))`),
 	name: text("name").notNull(),
 	description: text("description").notNull(),
 	eventDate: integer("event_date", { mode: "timestamp" }).notNull(),
@@ -55,7 +138,10 @@ export const events = sqliteTable("events", {
 
 // This table handles the one-to-many relationship: one event -> many photos
 export const eventPhotos = sqliteTable("event_photos", {
-	id: integer("id").primaryKey({ autoIncrement: true }),
+	id: text("id")
+		.primaryKey()
+		.notNull()
+		.default(sql`(lower(hex(randomblob(16))))`),
 	url: text("url").notNull(),
 	caption: text("caption"),
 	eventId: integer("event_id")
