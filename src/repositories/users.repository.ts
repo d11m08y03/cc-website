@@ -14,7 +14,7 @@ export class UserRepository {
    * @param id The numeric ID of the user.
    * @returns The user object or undefined if not found.
    */
-  public async findById(id: number): Promise<User | undefined> {
+  public async findById(id: string): Promise<User | undefined> {
     return this.db.query.users.findFirst({
       where: eq(schema.users.id, id),
     });
@@ -60,7 +60,7 @@ export class UserRepository {
    * @returns The updated user object, or undefined if the user was not found.
    */
   public async update(
-    id: number,
+    id: string,
     userData: Partial<NewUser>,
   ): Promise<User | undefined> {
     const [updatedUser] = await this.db
@@ -77,7 +77,7 @@ export class UserRepository {
    * @param id The ID of the user to delete.
    * @returns An object containing the ID of the deleted user, or undefined if no user was deleted.
    */
-  public async delete(id: number): Promise<{ deletedId: number } | undefined> {
+  public async delete(id: string): Promise<{ deletedId: string } | undefined> {
     const [deletedUser] = await this.db
       .delete(schema.users)
       .where(eq(schema.users.id, id))

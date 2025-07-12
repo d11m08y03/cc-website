@@ -2,7 +2,7 @@ import { db } from "@/db/client";
 import { LogData } from "@/lib/types/app-logs.types";
 import { logger } from "@/services/app-logs.service";
 
-import { EventRepository } from "@/repositories/events.repository";
+import { EventRepository, Event } from "@/repositories/events.repository";
 import { EventParticipantRepository } from "@/repositories/event-participants.repository";
 import { EventJudgeRepository } from "@/repositories/event-judges.repository";
 import { EventOrganiserRepository } from "@/repositories/event-organisers.repository";
@@ -52,7 +52,7 @@ export class EventService {
    * @throws {EventNotFoundError} If no event with the given ID is found.
    */
   public async getEventDetails(
-    eventId: number,
+    eventId: string,
     logData: Omit<LogData, "meta">,
   ) {
     logger.info("Fetching event details.", {
@@ -80,8 +80,8 @@ export class EventService {
    * @throws {ParticipantAlreadyExistsError}
    */
   public async registerParticipantForEvent(
-    eventId: number,
-    userId: number,
+    eventId: string,
+    userId: string,
     logData: Omit<LogData, "meta" | "userId">,
   ) {
     const context = "EventService:registerParticipantForEvent";
@@ -123,7 +123,7 @@ export class EventService {
    * @throws {TeamAlreadyExistsError}
    */
   public async createTeamForEvent(
-    eventId: number,
+    eventId: string,
     teamName: string,
     logData: Omit<LogData, "meta">,
   ) {
@@ -169,9 +169,9 @@ export class EventService {
    * @throws {ParticipantNotFoundError}
    */
   public async assignParticipantToTeam(
-    eventId: number,
-    userId: number,
-    teamId: number,
+    eventId: string,
+    userId: string,
+    teamId: string,
     logData: Omit<LogData, "meta" | "userId">,
   ) {
     const context = "EventService:assignParticipantToTeam";
@@ -221,8 +221,8 @@ export class EventService {
    * @throws {OrganiserAlreadyAssignedError} If the organiser is already assigned to the event.
    */
   public async addOrganiserToEvent(
-    eventId: number,
-    organiserId: number,
+    eventId: string,
+    organiserId: string,
     logData: Omit<LogData, "meta">,
   ): Promise<void> {
     const context = "EventService:addOrganiserToEvent";
@@ -290,8 +290,8 @@ export class EventService {
    * @throws {OrganiserNotAssignedError} If the organiser was not assigned to the event.
    */
   public async removeOrganiserFromEvent(
-    eventId: number,
-    organiserId: number,
+    eventId: string,
+    organiserId: string,
     logData: Omit<LogData, "meta">,
   ): Promise<void> {
     const context = "EventService:removeOrganiserFromEvent";
@@ -337,8 +337,8 @@ export class EventService {
    * @throws {JudgeAlreadyAssignedError}
    */
   public async addJudgeToEvent(
-    eventId: number,
-    userId: number,
+    eventId: string,
+    userId: string,
     logData: Omit<LogData, "meta" | "userId">,
   ): Promise<void> {
     const context = "EventService:addJudgeToEvent";
@@ -381,8 +381,8 @@ export class EventService {
    * @throws {JudgeNotAssignedError} If the user was not a judge for the event.
    */
   public async removeJudgeFromEvent(
-    eventId: number,
-    userId: number,
+    eventId: string,
+    userId: string,
     logData: Omit<LogData, "meta" | "userId">,
   ): Promise<void> {
     const context = "EventService:removeJudgeFromEvent";
@@ -414,6 +414,25 @@ export class EventService {
       context,
       userId,
     });
+  }
+
+  /**
+   * Retrieves a list of events, ordered by most recent first.
+   * @param options An object for pagination { limit, offset }.
+   * @param logData Contextual data for logging.
+   * @returns An array of event objects.
+   */
+  public async getEventList(
+    options: { limit?: number; offset?: number },
+    logData: Omit<LogData, "meta">,
+  ): Promise<Event[]> {
+    logger.info("Fetching event list.", {
+      ...logData,
+      context: "EventService:getEventList",
+    });
+
+    const events = await this.eventRepo.findMany(options);
+    return events;
   }
 }
 

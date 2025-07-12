@@ -21,5 +21,5 @@ export type LogData = {
   // Any extra structured data to aid debugging.
   meta?: object;
   // The ID of the user who initiated the action, if applicable.
-  userId?: number;
+  userId?: string;
 };

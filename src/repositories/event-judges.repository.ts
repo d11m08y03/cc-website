@@ -7,57 +7,57 @@ type NewEventJudge = typeof schema.eventJudges.$inferInsert;
 type DB = DrizzleD1Database<typeof schema>;
 
 export class EventJudgeRepository {
-	constructor(private readonly db: DB) { }
+  constructor(private readonly db: DB) {}
 
-	/**
-	 * Creates a link between an event and a user, assigning them as a judge.
-	 * @param eventId The ID of the event.
-	 * @param userId The ID of the user to add as a judge.
-	 * @returns The newly created link object.
-	 */
-	public async addJudgeToEvent(
-		eventId: number,
-		userId: number,
-	): Promise<EventJudge> {
-		const [newLink] = await this.db
-			.insert(schema.eventJudges)
-			.values({ eventId, userId })
-			.returning();
+  /**
+   * Creates a link between an event and a user, assigning them as a judge.
+   * @param eventId The ID of the event.
+   * @param userId The ID of the user to add as a judge.
+   * @returns The newly created link object.
+   */
+  public async addJudgeToEvent(
+    eventId: string,
+    userId: string,
+  ): Promise<EventJudge> {
+    const [newLink] = await this.db
+      .insert(schema.eventJudges)
+      .values({ eventId, userId })
+      .returning();
 
-		return newLink;
-	}
+    return newLink;
+  }
 
-	/**
-	 * Removes a link between an event and a user, revoking their judge role.
-	 * @param eventId The ID of the event.
-	 * @param userId The ID of the user to remove.
-	 * @returns The deleted link object, or undefined if the link did not exist.
-	 */
-	public async removeJudgeFromEvent(
-		eventId: number,
-		userId: number,
-	): Promise<EventJudge | undefined> {
-		const [deletedLink] = await this.db
-			.delete(schema.eventJudges)
-			.where(
-				and(
-					eq(schema.eventJudges.eventId, eventId),
-					eq(schema.eventJudges.userId, userId),
-				),
-			)
-			.returning();
+  /**
+   * Removes a link between an event and a user, revoking their judge role.
+   * @param eventId The ID of the event.
+   * @param userId The ID of the user to remove.
+   * @returns The deleted link object, or undefined if the link did not exist.
+   */
+  public async removeJudgeFromEvent(
+    eventId: string,
+    userId: string,
+  ): Promise<string | undefined> {
+    const [deletedLink] = await this.db
+      .delete(schema.eventJudges)
+      .where(
+        and(
+          eq(schema.eventJudges.eventId, eventId),
+          eq(schema.eventJudges.userId, userId),
+        ),
+      )
+      .returning();
 
-		return deletedLink;
-	}
+    return deletedLink.userId;
+  }
 
-	/**
-	 * Finds all judge associations for a given event.
-	 * @param eventId The ID of the event.
-	 * @returns An array of link objects containing eventId and userId.
-	 */
-	public async findJudgesByEvent(eventId: number): Promise<EventJudge[]> {
-		return this.db.query.eventJudges.findMany({
-			where: eq(schema.eventJudges.eventId, eventId),
-		});
-	}
+  /**
+   * Finds all judge associations for a given event.
+   * @param eventId The ID of the event.
+   * @returns An array of link objects containing eventId and userId.
+   */
+  public async findJudgesByEvent(eventId: string): Promise<EventJudge[]> {
+    return this.db.query.eventJudges.findMany({
+      where: eq(schema.eventJudges.eventId, eventId),
+    });
+  }
 }
