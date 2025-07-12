@@ -48,6 +48,97 @@ export class EventService {
   }
 
   /**
+   * Creates a new event.
+   * @param eventData The data for the new event.
+   * @param logData Contextual data for logging.
+   * @returns The newly created event object.
+   */
+  public async createEvent(
+    eventData: Omit<Event, "id">,
+    logData: Omit<LogData, "meta">
+  ) {
+    logger.info("Creating new event.", {
+      ...logData,
+      context: "EventService:createEvent",
+    });
+    const newEvent = await this.eventRepo.create(eventData);
+    logger.info("Successfully created event.", {
+      ...logData,
+      context: "EventService:createEvent",
+      meta: { eventId: newEvent.id },
+    });
+    return newEvent;
+  }
+
+  /**
+   * Updates an existing event.
+   * @param eventId The ID of the event to update.
+   * @param eventData The data to update.
+   * @param logData Contextual data for logging.
+   * @returns The updated event object.
+   * @throws {EventNotFoundError} If the event is not found.
+   */
+  public async updateEvent(
+    eventId: string,
+    eventData: Partial<Omit<Event, "id">>,
+    logData: Omit<LogData, "meta">
+  ) {
+    logger.info("Updating event.", {
+      ...logData,
+      context: "EventService:updateEvent",
+      meta: { eventId },
+    });
+    const updatedEvent = await this.eventRepo.update(eventId, eventData);
+
+    if (!updatedEvent) {
+      logger.warn("Event not found for update.", {
+        ...logData,
+        context: "EventService:updateEvent",
+        meta: { eventId },
+      });
+      throw new EventNotFoundError();
+    }
+
+    logger.info("Successfully updated event.", {
+      ...logData,
+      context: "EventService:updateEvent",
+      meta: { eventId },
+    });
+
+    return updatedEvent;
+  }
+
+  /**
+   * Deletes an event.
+   * @param eventId The ID of the event to delete.
+   * @param logData Contextual data for logging.
+   * @throws {EventNotFoundError} If the event is not found.
+   */
+  public async deleteEvent(eventId: string, logData: Omit<LogData, "meta">) {
+    logger.info("Deleting event.", {
+      ...logData,
+      context: "EventService:deleteEvent",
+      meta: { eventId },
+    });
+    const deletedEvent = await this.eventRepo.delete(eventId);
+
+    if (!deletedEvent) {
+      logger.warn("Event not found for deletion.", {
+        ...logData,
+        context: "EventService:deleteEvent",
+        meta: { eventId },
+      });
+      throw new EventNotFoundError();
+    }
+
+    logger.info("Successfully deleted event.", {
+      ...logData,
+      context: "EventService:deleteEvent",
+      meta: { eventId },
+    });
+  }
+
+  /**
    * Retrieves the full details of a single event, including all relations.
    * @throws {EventNotFoundError} If no event with the given ID is found.
    */
@@ -410,6 +501,48 @@ export class EventService {
     }
 
     logger.info("Successfully removed judge from event.", {
+      ...logData,
+      context,
+      userId,
+    });
+  }
+
+  /**
+   * Removes a participant from their team, making them a solo participant.
+   * This action does not un-register them from the event itself.
+   * @param eventId The ID of the event.
+   * @param userId The ID of the user to remove from a team.
+   * @param logData Contextual data for logging.
+   * @throws {ParticipantNotFoundError} If the participant is not found in the event or team.
+   */
+  public async removeParticipantFromTeam(
+    eventId: string,
+    userId: string,
+    logData: Omit<LogData, "meta" | "userId">,
+  ): Promise<void> {
+    const context = "EventService:removeParticipantFromTeam";
+    const meta = { eventId, userId };
+    logger.info("Attempting to remove participant from team.", {
+      ...logData,
+      context,
+      meta,
+    });
+
+    const deletedLink = await this.eventParticipantRepo.removeParticipantFromTeam(
+      eventId,
+      userId,
+    );
+
+    if (!deletedLink) {
+      logger.warn("Remove failed: participant not found in team.", {
+        ...logData,
+        context,
+        meta,
+      });
+      throw new ParticipantNotFoundError("Participant not found in team.");
+    }
+
+    logger.info("Successfully removed participant from team.", {
       ...logData,
       context,
       userId,

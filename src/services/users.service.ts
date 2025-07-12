@@ -128,7 +128,7 @@ export class UserService {
    * @throws {UserNotFoundError} If the user is not found.
    */
   public async getUserProfile(
-    id: number,
+    id: string,
     logData: Omit<LogData, "meta" | "userId">,
   ): Promise<Omit<User, "hashedPassword">> {
     logger.info("Attempting to fetch user profile.", {
