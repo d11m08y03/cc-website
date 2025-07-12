@@ -9,6 +9,8 @@ import {
 } from "@/lib/errors/event.errors";
 import { NextRequest } from "next/server";
 import { UserNotFoundError } from "@/lib/errors/user.errors";
+import { assignJudgeSchema } from "@/lib/validators/event.validators";
+import { ZodError } from "zod";
 
 /**
  * API route handler for adding a judge to an event.
@@ -21,15 +23,15 @@ export async function POST(
   const correlationId = randomUUID();
   const eventId = params.id;
   const body = await req.json();
-  const { userId } = body;
 
   logger.info("API request received to add judge to event.", {
     correlationId,
     context: `POST /api/events/${eventId}/judges`,
-    meta: { eventId, userId },
+    meta: { eventId, body },
   });
 
   try {
+    const { userId } = assignJudgeSchema.parse(body);
     await eventService.addJudgeToEvent(eventId, userId, {
       correlationId,
     });
@@ -40,6 +42,10 @@ export async function POST(
       context: `POST /api/events/${eventId}/judges`,
       meta: { error },
     });
+
+    if (error instanceof ZodError) {
+      return createErrorResponse(error.issues[0].message, "BAD_REQUEST", 400);
+    }
 
     if (error instanceof EventNotFoundError) {
       return createErrorResponse(error.message, "EVENT_NOT_FOUND", 404);
@@ -72,15 +78,15 @@ export async function DELETE(
   const correlationId = randomUUID();
   const eventId = params.id;
   const body = await req.json();
-  const { userId } = body;
 
   logger.info("API request received to remove judge from event.", {
     correlationId,
     context: `DELETE /api/events/${eventId}/judges`,
-    meta: { eventId, userId },
+    meta: { eventId, body },
   });
 
   try {
+    const { userId } = assignJudgeSchema.parse(body);
     await eventService.removeJudgeFromEvent(eventId, userId, {
       correlationId,
     });
@@ -91,6 +97,10 @@ export async function DELETE(
       context: `DELETE /api/events/${eventId}/judges`,
       meta: { error },
     });
+
+    if (error instanceof ZodError) {
+      return createErrorResponse(error.issues[0].message, "BAD_REQUEST", 400);
+    }
 
     if (error instanceof JudgeNotAssignedError) {
       return createErrorResponse(error.message, "JUDGE_NOT_ASSIGNED", 404);

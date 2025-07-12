@@ -54,7 +54,7 @@ export class EventService {
    * @returns The newly created event object.
    */
   public async createEvent(
-    eventData: Omit<Event, "id">,
+    eventData: Omit<Event, "id" | "createdAt">,
     logData: Omit<LogData, "meta">
   ) {
     logger.info("Creating new event.", {

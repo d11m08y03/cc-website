@@ -9,6 +9,8 @@ import {
   OrganiserNotAssignedError,
 } from "@/lib/errors/event.errors";
 import { NextRequest } from "next/server";
+import { assignOrganiserSchema } from "@/lib/validators/event.validators";
+import { ZodError } from "zod";
 
 /**
  * API route handler for adding an organiser to an event.
@@ -21,15 +23,15 @@ export async function POST(
   const correlationId = randomUUID();
   const eventId = params.id;
   const body = await req.json();
-  const { organiserId } = body;
 
   logger.info("API request received to add organiser to event.", {
     correlationId,
     context: `POST /api/events/${eventId}/organisers`,
-    meta: { eventId, organiserId },
+    meta: { eventId, body },
   });
 
   try {
+    const { organiserId } = assignOrganiserSchema.parse(body);
     await eventService.addOrganiserToEvent(eventId, organiserId, {
       correlationId,
     });
@@ -41,6 +43,10 @@ export async function POST(
       meta: { error },
     });
 
+    if (error instanceof ZodError) {
+      return createErrorResponse(error.issues[0].message, "BAD_REQUEST", 400);
+    }
+
     if (error instanceof EventNotFoundError) {
       return createErrorResponse(error.message, "EVENT_NOT_FOUND", 404);
     }
@@ -50,7 +56,11 @@ export async function POST(
     }
 
     if (error instanceof OrganiserAlreadyAssignedError) {
-      return createErrorResponse(error.message, "ORGANISER_ALREADY_ASSIGNED", 409);
+      return createErrorResponse(
+        error.message,
+        "ORGANISER_ALREADY_ASSIGNED",
+        409,
+      );
     }
 
     return createErrorResponse(
@@ -72,25 +82,32 @@ export async function DELETE(
   const correlationId = randomUUID();
   const eventId = params.id;
   const body = await req.json();
-  const { organiserId } = body;
 
   logger.info("API request received to remove organiser from event.", {
     correlationId,
     context: `DELETE /api/events/${eventId}/organisers`,
-    meta: { eventId, organiserId },
+    meta: { eventId, body },
   });
 
   try {
+    const { organiserId } = assignOrganiserSchema.parse(body);
     await eventService.removeOrganiserFromEvent(eventId, organiserId, {
       correlationId,
     });
     return createSuccessResponse({ removed: true });
   } catch (error) {
-    logger.error("An unexpected error occurred in removeOrganiserFromEvent API.", {
-      correlationId,
-      context: `DELETE /api/events/${eventId}/organisers`,
-      meta: { error },
-    });
+    logger.error(
+      "An unexpected error occurred in removeOrganiserFromEvent API.",
+      {
+        correlationId,
+        context: `DELETE /api/events/${eventId}/organisers`,
+        meta: { error },
+      },
+    );
+
+    if (error instanceof ZodError) {
+      return createErrorResponse(error.issues[0].message, "BAD_REQUEST", 400);
+    }
 
     if (error instanceof OrganiserNotAssignedError) {
       return createErrorResponse(error.message, "ORGANISER_NOT_ASSIGNED", 404);
