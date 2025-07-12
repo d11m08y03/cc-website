@@ -41,13 +41,13 @@ export class AppLogRepository {
 	 * @param options An object containing filters like userId, level, and pagination.
 	 * @returns An array of log objects matching the criteria.
 	 */
-	public async find(options: {
-		userId?: number;
+	public async find(filters: {
+		userId?: string;
 		level?: string;
 		limit?: number;
 		offset?: number;
 	}): Promise<Log[]> {
-		const { userId, level, limit = 50, offset } = options;
+		const { userId, level, limit = 50, offset } = filters;
 		const conditions = [];
 
 		if (userId) {
