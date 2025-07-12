@@ -1,78 +1,64 @@
-import NextAuth from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
-import { DrizzleAdapter } from "@auth/drizzle-adapter";
-import { db } from "@/db/client";
+import { eventService } from "@/services/events.service";
 import { logger } from "@/services/app-logs.service";
 import { randomUUID } from "crypto";
-import type { Adapter } from "next-auth/adapters";
+import { createSuccessResponse, createErrorResponse } from "@/lib/api-helpers";
+import {
+	EventNotFoundError,
+	ParticipantAlreadyExistsError,
+} from "@/lib/errors/event.errors";
+import { UserNotFoundError } from "@/lib/errors/user.errors";
+import { handlers } from "@/lib/auth";
 
 /**
- * This is the central configuration for NextAuth.js.
- * It is used in the [...nextauth] route handler and for server-side session access.
+ * API route handler for registering the current user for a specific event.
+ * Responds to POST /api/events/[id]/register
  */
-export const {
-  handlers, // The route handlers for GET and POST
-  auth, // The main function to get the session on the server
-  signIn, // Server-side function to initiate sign-in
-  signOut, // Server-side function to initiate sign-out
-} = NextAuth({
-  adapter: DrizzleAdapter(db) as Adapter,
+export async function POST(_: Request, { params }: { params: { id: string } }) {
+	const correlationId = randomUUID();
+	const eventId = params.id;
 
-  // Configure authentication providers.
-  providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }),
-  ],
+	const session = await handlers.auth();
+	const userId = session?.user?.id;
 
-  // Define the session management strategy.
-  session: {
-    strategy: "jwt",
-  },
+	logger.info("API request to register for an event.", {
+		correlationId,
+		context: `POST /api/events/${eventId}/register`,
+		userId,
+		meta: { eventId },
+	});
 
-  // Callbacks for customizing JWTs and sessions.
-  callbacks: {
-    async jwt({ token, user }) {
-      // On initial sign-in, add custom properties to the token.
-      if (user) {
-        token.id = user.id;
-        // @ts-ignore - Augmenting the user object for our custom isAdmin flag
-        token.isAdmin = user.isAdmin;
-      }
-      return token;
-    },
+	if (!userId) {
+		return createErrorResponse("Unauthorized", "UNAUTHORIZED", 401);
+	}
 
-    async session({ session, token }) {
-      // Pass the custom properties from the token to the client-side session.
-      if (session.user) {
-        // @ts-ignore - Augmenting the session object
-        session.user.id = token.id as string;
-        // @ts-ignore - Augmenting the session object
-        session.user.isAdmin = token.isAdmin as boolean;
-      }
-      return session;
-    },
-  },
+	try {
+		await eventService.registerParticipantForEvent(eventId, userId, {
+			correlationId,
+		});
+		return createSuccessResponse({ registered: true });
+	} catch (error) {
+		logger.error("Error registering participant for event.", {
+			correlationId,
+			context: `POST /api/events/${eventId}/register`,
+			userId,
+			meta: { error },
+		});
 
-  // Events for logging key authentication lifecycle events.
-  events: {
-    async signIn(message) {
-      logger.info("User signed in successfully.", {
-        correlationId: randomUUID(),
-        context: "NextAuth:signIn",
-        userId: message.user.id,
-        meta: { email: message.user.email },
-      });
-    },
-    async signOut(message) {
-      if (message.token) {
-        logger.info("User signed out.", {
-          correlationId: randomUUID(),
-          context: "NextAuth:signOut",
-          userId: message.token.id as string,
-        });
-      }
-    },
-  },
-});
+		if (error instanceof EventNotFoundError) {
+			return createErrorResponse(error.message, "EVENT_NOT_FOUND", 404);
+		}
+		if (error instanceof UserNotFoundError) {
+			// This case is unlikely if the user is authenticated, but good practice.
+			return createErrorResponse(error.message, "USER_NOT_FOUND", 404);
+		}
+		if (error instanceof ParticipantAlreadyExistsError) {
+			return createErrorResponse(error.message, "ALREADY_REGISTERED", 409);
+		}
+
+		return createErrorResponse(
+			"An internal server error occurred.",
+			"INTERNAL_SERVER_ERROR",
+			500,
+		);
+	}
+}

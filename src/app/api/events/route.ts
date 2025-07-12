@@ -1,8 +1,8 @@
 import { eventService } from "@/services/events.service";
 import { logger } from "@/services/app-logs.service";
 import { randomUUID } from "crypto";
-
 import { createSuccessResponse, createErrorResponse } from "@/lib/api-helpers";
+import {NextRequest} from "next/server";
 
 /**
  * API route handler for fetching a list of all events.
@@ -26,6 +26,40 @@ export async function GET(_: Request) {
     logger.error("An unexpected error occurred in getEventList API.", {
       correlationId,
       context: "GET /api/events",
+      meta: { error },
+    });
+
+    return createErrorResponse(
+      "An internal server error occurred.",
+      "INTERNAL_SERVER_ERROR",
+      500,
+    );
+  }
+}
+
+/**
+ * API route handler for creating a new event.
+ * Responds to POST /api/events
+ */
+export async function POST(req: NextRequest) {
+  const correlationId = randomUUID();
+  const body = await req.json();
+
+  logger.info("API request received to create event.", {
+    correlationId,
+    context: "POST /api/events",
+    meta: { body },
+  });
+
+  try {
+    const newEvent = await eventService.createEvent(body, {
+      correlationId,
+    });
+    return createSuccessResponse(newEvent, 201);
+  } catch (error) {
+    logger.error("An unexpected error occurred in createEvent API.", {
+      correlationId,
+      context: "POST /api/events",
       meta: { error },
     });
 
