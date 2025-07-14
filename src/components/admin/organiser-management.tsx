@@ -43,9 +43,9 @@ export function OrganiserManagement() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<UserAsOrganiser | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<UserAsOrganiser[]>([]);
-  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(''); // Added
+  const [searchResults, setSearchResults] = useState<UserAsOrganiser[]>([]); // Added
+  const [searchLoading, setSearchLoading] = useState(false); // Added
 
   const fetchOrganisers = async () => {
     setLoading(true);
@@ -112,7 +112,7 @@ export function OrganiserManagement() {
     }
   };
 
-  const handleSearchUsers = async () => {
+  const handleSearchUsers = async () => { // Added
     if (!searchQuery) return;
     setSearchLoading(true);
     try {
@@ -128,6 +128,8 @@ export function OrganiserManagement() {
       }
     } catch (err: any) {
       toast.error(`Error searching users: ${err.message}`);
+    } finally {
+      setSearchLoading(false);
     }
   };
 
@@ -231,8 +233,8 @@ export function OrganiserManagement() {
               {searchLoading ? 'Searching...' : 'Search'}
             </Button>
           </div>
-          {searchResults.length > 0 && (
-            <div className="max-h-60 overflow-y-auto border rounded-md">
+          {searchResults.length > 0 ? (
+            <div className="max-h-60 overflow-y-auto border rounded-md mt-2">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -261,9 +263,10 @@ export function OrganiserManagement() {
                 </TableBody>
               </Table>
             </div>
-          )}
-          {searchQuery && searchResults.length === 0 && !searchLoading && (
-            <p className="text-center text-muted-foreground">No users found.</p>
+          ) : (
+            searchQuery && !searchLoading && (
+              <p className="text-center text-muted-foreground">No users found.</p>
+            )
           )}
         </DialogContent>
       </Dialog>

@@ -12,7 +12,7 @@ export const appLogs = sqliteTable("app_logs", {
     .primaryKey()
     .notNull()
     .default(sql`(lower(hex(randomblob(16))))`),
-  timestamp: integer("timestamp", { mode: "timestamp" })
+  timestamp: integer("timestamp", { mode: "number" })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
   level: text("level").notNull(),

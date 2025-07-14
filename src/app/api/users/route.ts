@@ -4,6 +4,7 @@ import { randomUUID } from "crypto";
 import { createSuccessResponse, createErrorResponse } from "@/lib/api-helpers";
 import { NextRequest } from "next/server";
 import { UserNotFoundError } from "@/lib/errors/user.errors";
+import { handlers } from "@/lib/auth"; // Added import for handlers
 
 /**
  * API route handler for fetching users.
@@ -16,7 +17,7 @@ export async function GET(req: NextRequest) {
   const fetchMe = searchParams.get("me");
 
   if (fetchMe) {
-    const session = await handlers.auth(); // Assuming handlers.auth() is available
+    const session = await handlers.auth();
     const userId = session?.user?.id;
 
     logger.info("API request received to get current user profile.", {
@@ -61,7 +62,7 @@ export async function GET(req: NextRequest) {
     });
 
     try {
-      const users = await userService.searchUsers(search, { correlationId }); // You need to implement searchUsers in userService
+      const users = await userService.searchUsers(search, { correlationId });
       return createSuccessResponse(users);
     } catch (error) {
       logger.error("An unexpected error occurred in searchUsers API.", {
@@ -83,7 +84,7 @@ export async function GET(req: NextRequest) {
     });
 
     try {
-      const users = await userService.getAllUsers({ correlationId }); // You need to implement getAllUsers in userService
+      const users = await userService.getAllUsers({ correlationId });
       return createSuccessResponse(users);
     } catch (error) {
       logger.error("An unexpected error occurred in getAllUsers API.", {
