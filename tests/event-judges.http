@@ -1,0 +1,15 @@
+### Add Judge to Event
+POST http://localhost:3000/api/events/{{eventId}}/judges
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}"
+}
+
+### Remove Judge from Event
+DELETE http://localhost:3000/api/events/{{eventId}}/judges
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}"
+}

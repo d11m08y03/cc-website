@@ -36,13 +36,14 @@ export const users = sqliteTable("users", {
   image: text("image"),
   hashedPassword: text("hashed_password"),
   isAdmin: int("is_admin", { mode: "boolean" }).default(false).notNull(),
+  isOrganiser: int("is_organiser", { mode: "boolean" }).default(false).notNull(), // Added isOrganiser
   createdAt: integer("created_at", { mode: "timestamp" })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
 });
 
 export const accounts = sqliteTable(
-  "account",
+  "accounts",
   {
     userId: text("userId")
       .notNull()
@@ -110,17 +111,7 @@ export const sessions = sqliteTable("session", {
   expires: integer("expires", { mode: "timestamp_ms" }).notNull(),
 });
 
-export const organisers = sqliteTable("organisers", {
-  id: text("id")
-    .primaryKey()
-    .notNull()
-    .default(sql`(lower(hex(randomblob(16))))`),
-  name: text("name").notNull(),
-  profilePicUrl: text("profile_pic_url"),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-});
+// Removed organisers table
 
 export const events = sqliteTable("events", {
   id: text("id")
@@ -170,13 +161,13 @@ export const eventsToOrganisers = sqliteTable(
     eventId: text("event_id")
       .notNull()
       .references(() => events.id, { onDelete: "cascade" }),
-    organiserId: text("organiser_id")
+    userId: text("user_id") // Changed from organiserId to userId
       .notNull()
-      .references(() => organisers.id, { onDelete: "cascade" }),
+      .references(() => users.id, { onDelete: "cascade" }), // References users.id
   },
   // Composite primary key ensures each event-organiser pair is unique
   (t) => ({
-    pk: primaryKey({ columns: [t.eventId, t.organiserId] }),
+    pk: primaryKey({ columns: [t.eventId, t.userId] }), // Changed organiserId to userId
   }),
 );
 
@@ -237,9 +228,7 @@ export const appLogRelations = relations(appLogs, ({ one }) => ({
   }),
 }));
 
-export const organiserRelations = relations(organisers, ({ many }) => ({
-  eventsToOrganisers: many(eventsToOrganisers),
-}));
+// Removed organiserRelations
 
 export const eventRelations = relations(events, ({ many }) => ({
   eventPhotos: many(eventPhotos),
@@ -271,9 +260,29 @@ export const eventsToOrganisersRelations = relations(
       fields: [eventsToOrganisers.eventId],
       references: [events.id],
     }),
-    organiser: one(organisers, {
-      fields: [eventsToOrganisers.organiserId],
-      references: [organisers.id],
+    user: one(users, { // Changed from organiser to user
+      fields: [eventsToOrganisers.userId],
+      references: [users.id],
     }),
   }),
 );
+
+export const eventJudgesRelations = relations(eventJudges, ({ one }) => ({
+  event: one(events, {
+    fields: [eventJudges.eventId],
+    references: [events.id],
+  }),
+  user: one(users, {
+    fields: [eventJudges.userId],
+    references: [users.id],
+  }),
+}));
+
+export const userRelations = relations(users, ({ many }) => ({
+  appLogs: many(appLogs),
+  accounts: many(accounts),
+  sessions: many(sessions),
+  eventParticipants: many(eventParticipants),
+  eventJudges: many(eventJudges),
+  eventsToOrganisers: many(eventsToOrganisers),
+}));

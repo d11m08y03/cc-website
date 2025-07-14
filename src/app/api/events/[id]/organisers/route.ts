@@ -5,12 +5,12 @@ import { createSuccessResponse, createErrorResponse } from "@/lib/api-helpers";
 import {
   EventNotFoundError,
   OrganiserAlreadyAssignedError,
-  OrganiserNotFoundError,
   OrganiserNotAssignedError,
 } from "@/lib/errors/event.errors";
 import { NextRequest } from "next/server";
 import { assignOrganiserSchema } from "@/lib/validators/event.validators";
 import { ZodError } from "zod";
+import { UserNotFoundError } from "@/lib/errors/user.errors";
 
 /**
  * API route handler for adding an organiser to an event.
@@ -31,8 +31,8 @@ export async function POST(
   });
 
   try {
-    const { organiserId } = assignOrganiserSchema.parse(body);
-    await eventService.addOrganiserToEvent(eventId, organiserId, {
+    const { userId } = assignOrganiserSchema.parse(body);
+    await eventService.addOrganiserToEvent(eventId, userId, {
       correlationId,
     });
     return createSuccessResponse({ added: true });
@@ -51,8 +51,8 @@ export async function POST(
       return createErrorResponse(error.message, "EVENT_NOT_FOUND", 404);
     }
 
-    if (error instanceof OrganiserNotFoundError) {
-      return createErrorResponse(error.message, "ORGANISER_NOT_FOUND", 404);
+    if (error instanceof UserNotFoundError) {
+      return createErrorResponse(error.message, "USER_NOT_FOUND", 404);
     }
 
     if (error instanceof OrganiserAlreadyAssignedError) {
@@ -90,8 +90,8 @@ export async function DELETE(
   });
 
   try {
-    const { organiserId } = assignOrganiserSchema.parse(body);
-    await eventService.removeOrganiserFromEvent(eventId, organiserId, {
+    const { userId } = assignOrganiserSchema.parse(body);
+    await eventService.removeOrganiserFromEvent(eventId, userId, {
       correlationId,
     });
     return createSuccessResponse({ removed: true });

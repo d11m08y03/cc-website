@@ -17,11 +17,11 @@ export class EventOrganiserRepository {
    */
   public async addOrganiserToEvent(
     eventId: string,
-    organiserId: string,
+    userId: string, // Changed from organiserId to userId
   ): Promise<EventToOrganiser> {
     const [newLink] = await this.db
       .insert(schema.eventsToOrganisers)
-      .values({ eventId, organiserId })
+      .values({ eventId, userId })
       .returning();
 
     return newLink;
@@ -35,14 +35,14 @@ export class EventOrganiserRepository {
    */
   public async removeOrganiserFromEvent(
     eventId: string,
-    organiserId: string,
+    userId: string, // Changed from organiserId to userId
   ): Promise<EventToOrganiser | undefined> {
     const [deletedLink] = await this.db
       .delete(schema.eventsToOrganisers)
       .where(
         and(
           eq(schema.eventsToOrganisers.eventId, eventId),
-          eq(schema.eventsToOrganisers.organiserId, organiserId),
+          eq(schema.eventsToOrganisers.userId, userId), // Changed from organiserId to userId
         ),
       )
       .returning();

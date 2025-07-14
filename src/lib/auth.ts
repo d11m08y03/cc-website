@@ -31,7 +31,7 @@ export const handlers = NextAuth({
       // On initial sign-in, the `user` object is available.
       if (user) {
         token.id = user.id; // Persist the user's ID in the token
-        // @ts-ignore - Augmenting the user object
+        // @ts-expect-error - Augmenting the user object
         token.isAdmin = user.isAdmin; // Persist the isAdmin flag
       }
       return token;
@@ -43,9 +43,9 @@ export const handlers = NextAuth({
      */
     async session({ session, token }) {
       if (session.user) {
-        // @ts-ignore - Augmenting the session object
+        // @ts-expect-error - Augmenting the session object
         session.user.id = token.id as string;
-        // @ts-ignore - Augmenting the session object
+        // @ts-expect-error - Augmenting the session object
         session.user.isAdmin = token.isAdmin as boolean;
       }
       return session;
@@ -72,5 +72,3 @@ export const handlers = NextAuth({
     },
   },
 });
-
-export { handlers as GET, handlers as POST };

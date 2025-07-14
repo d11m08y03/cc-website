@@ -1,5 +1,5 @@
 import type { DrizzleD1Database } from "drizzle-orm/d1";
-import { eq } from "drizzle-orm";
+import { eq, or, like } from "drizzle-orm";
 import * as schema from "@/db/schema";
 
 export type User = typeof schema.users.$inferSelect;
@@ -84,5 +84,38 @@ export class UserRepository {
       .returning({ deletedId: schema.users.id });
 
     return deletedUser;
+  }
+
+  /**
+   * Sets or unsets the isOrganiser flag for a user.
+   * @param id The ID of the user to update.
+   * @param isOrganiser The boolean value to set for the isOrganiser flag.
+   * @returns The updated user object, or undefined if the user was not found.
+   */
+  public async setIsOrganiser(
+    id: string,
+    isOrganiser: boolean,
+  ): Promise<User | undefined> {
+    const [updatedUser] = await this.db
+      .update(schema.users)
+      .set({ isOrganiser })
+      .where(eq(schema.users.id, id))
+      .returning();
+
+    return updatedUser;
+  }
+
+  /**
+   * Searches for users by name or email.
+   * @param query The search query string.
+   * @returns An array of matching user objects.
+   */
+  public async search(query: string): Promise<User[]> {
+    return this.db.query.users.findMany({
+      where: or(
+        like(schema.users.name, `%${query}%`),
+        like(schema.users.email, `%${query}%`),
+      ),
+    });
   }
 }

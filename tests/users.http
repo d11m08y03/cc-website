@@ -1,0 +1,13 @@
+### Get Current User Profile
+GET http://localhost:3000/api/users/me
+Authorization: Bearer {{AUTH_TOKEN}}
+
+### Update User Profile (Example - not implemented in API yet)
+# PUT http://localhost:3000/api/users/me
+# Content-Type: application/json
+# Authorization: Bearer {{AUTH_TOKEN}}
+# 
+# {
+#   "name": "Jane Doe",
+#   "email": "jane.doe@example.com"
+# }

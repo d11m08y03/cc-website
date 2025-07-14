@@ -1,0 +1,11 @@
+### Get All Logs
+GET http://localhost:3000/api/logs
+
+### Get Logs by Level
+GET http://localhost:3000/api/logs?level=ERROR
+
+### Get Logs by User ID
+GET http://localhost:3000/api/logs?userId={{userId}}
+
+### Get Logs with Limit and Offset
+GET http://localhost:3000/api/logs?limit=10&offset=0

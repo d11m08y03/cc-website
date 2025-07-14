@@ -13,7 +13,7 @@ export const createEventSchema = z.object({
 export const updateEventSchema = createEventSchema.partial();
 
 export const assignOrganiserSchema = z.object({
-  organiserId: z.string().min(1, "Organiser ID is required."),
+  userId: z.string().min(1, "User ID is required."), // Changed from organiserId to userId
 });
 
 export const assignJudgeSchema = z.object({

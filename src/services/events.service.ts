@@ -5,10 +5,9 @@ import { logger } from "@/services/app-logs.service";
 import { EventRepository, Event } from "@/repositories/events.repository";
 import { EventParticipantRepository } from "@/repositories/event-participants.repository";
 import { EventJudgeRepository } from "@/repositories/event-judges.repository";
-import { EventOrganiserRepository } from "@/repositories/event-organisers.repository";
+
 import { EventTeamRepository } from "@/repositories/event-teams.repository";
 import { UserRepository } from "@/repositories/users.repository";
-import { OrganiserRepository } from "@/repositories/organisers.repository";
 
 import { UserNotFoundError } from "@/lib/errors/user.errors";
 import {
@@ -17,12 +16,12 @@ import {
   TeamNotFoundError,
   TeamAlreadyExistsError,
   ParticipantNotFoundError,
-  OrganiserNotFoundError,
   OrganiserAlreadyAssignedError,
   OrganiserNotAssignedError,
   JudgeAlreadyAssignedError,
   JudgeNotAssignedError,
 } from "@/lib/errors/event.errors";
+import { EventOrganiserRepository } from "@/repositories/event-organisers.repository";
 
 /**
  * Service for handling all business logic related to events.
@@ -31,20 +30,19 @@ import {
 export class EventService {
   private eventRepo: EventRepository;
   private eventParticipantRepo: EventParticipantRepository;
-  private eventOrganiserRepo: EventOrganiserRepository;
+
   private eventTeamRepo: EventTeamRepository;
   private userRepo: UserRepository;
-  private organiserRepo: OrganiserRepository;
   private eventJudgeRepo: EventJudgeRepository;
+  private eventOrganiserRepo: EventOrganiserRepository;
 
   constructor() {
     this.eventRepo = new EventRepository(db);
     this.eventParticipantRepo = new EventParticipantRepository(db);
     this.eventOrganiserRepo = new EventOrganiserRepository(db);
+		this.eventJudgeRepo = new EventJudgeRepository(db);
     this.eventTeamRepo = new EventTeamRepository(db);
     this.userRepo = new UserRepository(db);
-    this.organiserRepo = new OrganiserRepository(db);
-    this.eventJudgeRepo = new EventJudgeRepository(db);
   }
 
   /**
@@ -55,7 +53,7 @@ export class EventService {
    */
   public async createEvent(
     eventData: Omit<Event, "id" | "createdAt">,
-    logData: Omit<LogData, "meta">
+    logData: Omit<LogData, "meta">,
   ) {
     logger.info("Creating new event.", {
       ...logData,
@@ -81,7 +79,7 @@ export class EventService {
   public async updateEvent(
     eventId: string,
     eventData: Partial<Omit<Event, "id">>,
-    logData: Omit<LogData, "meta">
+    logData: Omit<LogData, "meta">,
   ) {
     logger.info("Updating event.", {
       ...logData,
@@ -303,31 +301,31 @@ export class EventService {
   }
 
   /**
-   * Assigns an existing organiser to a specific event.
+   * Assigns an existing user to be an organiser for a specific event.
    * @param eventId The ID of the event.
-   * @param organiserId The ID of the organiser to assign.
+   * @param userId The ID of the user to assign as an organiser.
    * @param logData Contextual data for logging.
    * @throws {EventNotFoundError} If the event does not exist.
-   * @throws {OrganiserNotFoundError} If the organiser does not exist.
-   * @throws {OrganiserAlreadyAssignedError} If the organiser is already assigned to the event.
+   * @throws {UserNotFoundError} If the user does not exist or is not an organiser.
+   * @throws {OrganiserAlreadyAssignedError} If the user is already assigned to the event as an organiser.
    */
   public async addOrganiserToEvent(
     eventId: string,
-    organiserId: string,
+    userId: string,
     logData: Omit<LogData, "meta">,
   ): Promise<void> {
     const context = "EventService:addOrganiserToEvent";
-    const meta = { eventId, organiserId };
+    const meta = { eventId, userId };
     logger.info("Attempting to assign organiser to event.", {
       ...logData,
       context,
       meta,
     });
 
-    // Concurrently verify that both the event and organiser exist.
-    const [event, organiser] = await Promise.all([
+    // Concurrently verify that both the event and user exist.
+    const [event, user] = await Promise.all([
       this.eventRepo.findById(eventId),
-      this.organiserRepo.findById(organiserId),
+      this.userRepo.findById(userId),
     ]);
 
     if (!event) {
@@ -338,22 +336,21 @@ export class EventService {
       });
       throw new EventNotFoundError();
     }
-    if (!organiser) {
-      logger.warn("Assign failed: organiser not found.", {
+    // Check if the user exists and is marked as an organiser
+    if (!user || !user.isOrganiser) {
+      logger.warn("Assign failed: user not found or not an organiser.", {
         ...logData,
         context,
         meta,
       });
-      throw new OrganiserNotFoundError();
+      throw new UserNotFoundError("User not found or not an organiser.");
     }
 
-    // Check if the organiser is already assigned to this event to prevent duplicates.
+    // Check if the user is already assigned to this event to prevent duplicates.
     const existingAssignments =
       await this.eventOrganiserRepo.findOrganisersByEvent(eventId);
     if (
-      existingAssignments.some(
-        (assignment) => assignment.organiserId === organiserId,
-      )
+      existingAssignments.some((assignment) => assignment.userId === userId)
     ) {
       logger.warn("Assign failed: organiser already assigned to this event.", {
         ...logData,
@@ -364,7 +361,7 @@ export class EventService {
     }
 
     // If all checks pass, create the link in the junction table.
-    await this.eventOrganiserRepo.addOrganiserToEvent(eventId, organiserId);
+    await this.eventOrganiserRepo.addOrganiserToEvent(eventId, userId);
 
     logger.info("Successfully assigned organiser to event.", {
       ...logData,
@@ -376,17 +373,17 @@ export class EventService {
   /**
    * Removes an organiser's assignment from a specific event.
    * @param eventId The ID of the event.
-   * @param organiserId The ID of the organiser to un-assign.
+   * @param userId The ID of the user to un-assign.
    * @param logData Contextual data for logging.
-   * @throws {OrganiserNotAssignedError} If the organiser was not assigned to the event.
+   * @throws {OrganiserNotAssignedError} If the user was not assigned to the event.
    */
   public async removeOrganiserFromEvent(
     eventId: string,
-    organiserId: string,
+    userId: string,
     logData: Omit<LogData, "meta">,
   ): Promise<void> {
     const context = "EventService:removeOrganiserFromEvent";
-    const meta = { eventId, organiserId };
+    const meta = { eventId, userId };
     logger.info("Attempting to remove organiser from event.", {
       ...logData,
       context,
@@ -396,7 +393,7 @@ export class EventService {
     // 1. Attempt to delete the link directly from the junction table.
     const deletedLink = await this.eventOrganiserRepo.removeOrganiserFromEvent(
       eventId,
-      organiserId,
+      userId,
     );
 
     // 2. Validate that a link was actually deleted.
@@ -528,10 +525,11 @@ export class EventService {
       meta,
     });
 
-    const deletedLink = await this.eventParticipantRepo.removeParticipantFromTeam(
-      eventId,
-      userId,
-    );
+    const deletedLink =
+      await this.eventParticipantRepo.removeParticipantFromTeam(
+        eventId,
+        userId,
+      );
 
     if (!deletedLink) {
       logger.warn("Remove failed: participant not found in team.", {

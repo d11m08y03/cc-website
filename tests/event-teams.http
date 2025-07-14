@@ -1,0 +1,11 @@
+### Create Team for Event
+POST http://localhost:3000/api/events/{{eventId}}/teams
+Content-Type: application/json
+
+{
+  "name": "Team Alpha"
+}
+
+### Join Team
+POST http://localhost:3000/api/events/{{eventId}}/teams/{{teamId}}/join
+Authorization: Bearer {{AUTH_TOKEN}}

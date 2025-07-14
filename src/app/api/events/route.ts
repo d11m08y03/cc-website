@@ -10,7 +10,7 @@ import { ZodError } from "zod";
  * API route handler for fetching a list of all events.
  * Responds to GET /api/events
  */
-export async function GET(_: Request) {
+export async function GET() {
   const correlationId = randomUUID();
 
   logger.info("API request received to get event list.", {

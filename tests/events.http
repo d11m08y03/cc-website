@@ -1,0 +1,28 @@
+### Get All Events
+GET http://localhost:3000/api/events
+
+### Create New Event
+POST http://localhost:3000/api/events
+Content-Type: application/json
+
+{
+  "name": "My New Event",
+  "description": "A description for my new event.",
+  "eventDate": "2025-12-25T10:00:00Z",
+  "location": "Virtual"
+}
+
+### Get Event Details by ID
+GET http://localhost:3000/api/events/{{eventId}}
+
+### Update Event by ID
+PUT http://localhost:3000/api/events/{{eventId}}
+Content-Type: application/json
+
+{
+  "name": "Updated Event Name",
+  "location": "New Location"
+}
+
+### Delete Event by ID
+DELETE http://localhost:3000/api/events/{{eventId}}
