@@ -125,6 +125,10 @@ export async function DELETE(
       meta: { error },
     });
 
+    if (error instanceof ZodError) { // Added ZodError handling
+      return createErrorResponse(error.issues[0].message, "BAD_REQUEST", 400);
+    }
+
     if (error instanceof EventNotFoundError) {
       return createErrorResponse(error.message, "EVENT_NOT_FOUND", 404);
     }

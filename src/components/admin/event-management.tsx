@@ -25,6 +25,10 @@ import { toast } from "sonner";
 import { createEventSchema, updateEventSchema, assignOrganiserSchema, assignJudgeSchema } from "@/lib/validators/event.validators";
 import { ZodError } from "zod";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { EventParticipantsManagement } from "./event-participants-management";
+import { EventJudgesManagement } from "./event-judges-management";
+import { Textarea } from "@/components/ui/textarea"; // Import Textarea
+import { Switch } from "@/components/ui/switch"; // Import Switch for isActive
 
 interface Event {
   id: string;
@@ -32,11 +36,14 @@ interface Event {
   description: string;
   eventDate: string;
   location: string;
+  poster?: string | null; // New poster field
+  isActive: boolean; // New isActive field
 }
 
 interface EventDetails extends Event {
   eventsToOrganisers: { user: { id: string; name: string; email: string; image?: string | null; } }[];
   judges: { user: { id: string; name: string; email: string; image?: string | null; } }[];
+  participants: { user: { id: string; name: string; email: string; image?: string | null; } }[]; // Added participants
 }
 
 interface User {
@@ -60,6 +67,8 @@ export function EventManagement() {
     description: '',
     eventDate: '',
     location: '',
+    poster: '', // Initialize new fields
+    isActive: true, // Initialize new fields
   });
   const [searchUserQuery, setSearchUserQuery] = useState('');
   const [searchUserResults, setSearchUserResults] = useState<User[]>([]);
@@ -85,6 +94,23 @@ export function EventManagement() {
       toast.error(`Error fetching events: ${err.message}`);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchEventDetails = async (eventId: string) => {
+    try {
+      const response = await fetch(`/api/events/${eventId}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      if (data.success) {
+        setCurrentEventDetails(data.data);
+      } else {
+        toast.error(`Failed to fetch event details: ${data.error.message}`);
+      }
+    } catch (err: any) {
+      toast.error(`Error fetching event details: ${err.message}`);
     }
   };
 
@@ -185,7 +211,7 @@ export function EventManagement() {
       if (data.success) {
         toast.success("Event added successfully!");
         setIsAddDialogOpen(false);
-        setNewEvent({ name: '', description: '', eventDate: '', location: '' });
+        setNewEvent({ name: '', description: '', eventDate: '', location: '', poster: '', isActive: true });
         fetchEvents();
       } else {
         toast.error(`Failed to add event: ${data.error.message}`);
@@ -216,7 +242,8 @@ export function EventManagement() {
       }
     } catch (err: any) {
       toast.error(`Error searching users: ${err.message}`);
-    } finally {
+    }
+    finally {
       setSearchUserLoading(false);
     }
   };
@@ -342,12 +369,13 @@ export function EventManagement() {
             <TableHead>Name</TableHead>
             <TableHead>Date</TableHead>
             <TableHead>Location</TableHead>
+            <TableHead>Active</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {events.map((event) => (
-            <TableRow key={event.id}><TableCell className="font-medium">{event.name}</TableCell><TableCell>{new Date(event.eventDate).toLocaleDateString()}</TableCell><TableCell>{event.location}</TableCell><TableCell>
+            <TableRow key={event.id}><TableCell className="font-medium">{event.name}</TableCell><TableCell>{new Date(event.eventDate).toLocaleDateString()}</TableCell><TableCell>{event.location}</TableCell><TableCell>{event.isActive ? 'Yes' : 'No'}</TableCell><TableCell>
                 <Button variant="outline" size="sm" className="mr-2" onClick={() => handleEditClick(event)}>
                   Edit
                 </Button>
@@ -368,7 +396,7 @@ export function EventManagement() {
 
       {currentEvent && (
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
               <DialogTitle>Edit Event</DialogTitle>
               <DialogDescription>
@@ -391,11 +419,11 @@ export function EventManagement() {
                 <Label htmlFor="description" className="text-right">
                   Description
                 </Label>
-                <Input
+                <Textarea
                   id="description"
                   value={currentEvent.description}
                   onChange={(e) => setCurrentEvent({ ...currentEvent, description: e.target.value })}
-                  className="col-span-3"
+                  className="col-span-3 min-h-[80px]"
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
@@ -421,6 +449,31 @@ export function EventManagement() {
                   className="col-span-3"
                 />
               </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="poster" className="text-right">
+                  Poster URL
+                </Label>
+                <Input
+                  id="poster"
+                  value={currentEvent.poster || ''}
+                  onChange={(e) => setCurrentEvent({ ...currentEvent, poster: e.target.value })}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="isActive" className="text-right">
+                  Is Active
+                </Label>
+                <div className="col-span-3 flex items-center">
+                  <input
+                    id="isActive"
+                    type="checkbox"
+                    checked={currentEvent.isActive}
+                    onChange={(e) => setCurrentEvent({ ...currentEvent, isActive: e.target.checked })}
+                    className="h-4 w-4"
+                  />
+                </div>
+              </div>
             </div>
             <DialogFooter>
               <Button type="submit" onClick={handleSaveEdit}>Save changes</Button>
@@ -431,7 +484,7 @@ export function EventManagement() {
 
       {/* Add Event Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Add New Event</DialogTitle>
             <DialogDescription>
@@ -454,11 +507,11 @@ export function EventManagement() {
               <Label htmlFor="add-description" className="text-right">
                 Description
               </Label>
-              <Input
+              <Textarea
                 id="add-description"
                 value={newEvent.description}
                 onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
-                className="col-span-3"
+                className="col-span-3 min-h-[80px]"
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
@@ -484,6 +537,29 @@ export function EventManagement() {
                 className="col-span-3"
               />
             </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="add-poster" className="text-right">
+                Poster URL
+              </Label>
+              <Input
+                id="add-poster"
+                value={newEvent.poster}
+                onChange={(e) => setNewEvent({ ...newEvent, poster: e.target.value })}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="add-isActive" className="text-right">
+                Is Active
+              </Label>
+              <input
+                id="add-isActive"
+                type="checkbox"
+                checked={newEvent.isActive}
+                onChange={(e) => setNewEvent({ ...newEvent, isActive: e.target.checked })}
+                className="col-span-3"
+              />
+            </div>
           </div>
           <DialogFooter>
             <Button type="submit" onClick={handleAddEvent}>Add Event</Button>
@@ -504,119 +580,19 @@ export function EventManagement() {
             <div className="grid gap-4 py-4">
               {/* Organisers Section */}
               <h4 className="text-lg font-semibold">Organisers</h4>
-              <div className="flex flex-col gap-2">
-                {currentEventDetails.eventsToOrganisers.length > 0 ? (
-                  currentEventDetails.eventsToOrganisers.map((org) => (
-                    <div key={org.user.id} className="flex items-center justify-between border p-2 rounded-md">
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage src={org.user.image || ''} alt={org.user.name || 'User'} />
-                          <AvatarFallback>{org.user.name?.[0] || 'U'}</AvatarFallback>
-                        </Avatar>
-                        <span>{org.user.name} ({org.user.email})</span>
-                      </div>
-                      <Button variant="destructive" size="sm" onClick={() => handleRemoveOrganiser(org.user.id)}>
-                        Remove
-                      </Button>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-muted-foreground">No organisers assigned to this event.</p>
-                )}
-              </div>
-              <div className="flex space-x-2 mt-2">
-                <Input
-                  placeholder="Search user to add as organiser..."
-                  value={searchUserQuery}
-                  onChange={(e) => setSearchUserQuery(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleSearchUsers(searchUserQuery);
-                  }}
-                />
-                <Button onClick={() => handleSearchUsers(searchUserQuery)} disabled={searchUserLoading}>
-                  {searchUserLoading ? 'Searching...' : 'Search'}
-                </Button>
-              </div>
-              {searchUserResults.length > 0 && (
-                <div className="max-h-40 overflow-y-auto border rounded-md mt-2">
-                  <Table>
-                    <TableBody>
-                      {searchUserResults.map((user) => (
-                        <TableRow key={user.id}><TableCell>{user.name} ({user.email})</TableCell><TableCell className="text-right">
-                            <Button
-                              size="sm"
-                              onClick={() => handleAddOrganiser(user.id)}
-                              disabled={currentEventDetails.eventsToOrganisers.some(org => org.user.id === user.id)}
-                            >
-                              {currentEventDetails.eventsToOrganisers.some(org => org.user.id === user.id) ? 'Already Organiser' : 'Add as Organiser'}
-                            </Button>
-                          </TableCell></TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-              {searchUserQuery && searchUserResults.length === 0 && !searchUserLoading && (
-                <p className="text-center text-muted-foreground">No users found for search.</p>
-              )}
+              <EventParticipantsManagement
+                eventId={currentEventDetails.id}
+                currentParticipants={currentEventDetails.participants} // Corrected prop
+                onUpdate={() => fetchEventDetails(currentEventDetails.id)}
+              />
 
               {/* Judges Section */}
               <h4 className="text-lg font-semibold mt-4">Judges</h4>
-              <div className="flex flex-col gap-2">
-                {currentEventDetails.judges.length > 0 ? (
-                  currentEventDetails.judges.map((judge) => (
-                    <div key={judge.user.id} className="flex items-center justify-between border p-2 rounded-md">
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage src={judge.user.image || ''} alt={judge.user.name || 'User'} />
-                          <AvatarFallback>{judge.user.name?.[0] || 'U'}</AvatarFallback>
-                        </Avatar>
-                        <span>{judge.user.name} ({judge.user.email})</span>
-                      </div>
-                      <Button variant="destructive" size="sm" onClick={() => handleRemoveJudge(judge.user.id)}>
-                        Remove
-                      </Button>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-muted-foreground">No judges assigned to this event.</p>
-                )}
-              </div>
-              <div className="flex space-x-2 mt-2">
-                <Input
-                  placeholder="Search user to add as judge..."
-                  value={searchUserQuery}
-                  onChange={(e) => setSearchUserQuery(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleSearchUsers(searchUserQuery);
-                  }}
-                />
-                <Button onClick={() => handleSearchUsers(searchUserQuery)} disabled={searchUserLoading}>
-                  {searchUserLoading ? 'Searching...' : 'Search'}
-                </Button>
-              </div>
-              {searchUserResults.length > 0 && (
-                <div className="max-h-40 overflow-y-auto border rounded-md mt-2">
-                  <Table>
-                    <TableBody>
-                      {searchUserResults.map((user) => (
-                        <TableRow key={user.id}><TableCell>{user.name} ({user.email})</TableCell><TableCell className="text-right">
-                            <Button
-                              size="sm"
-                              onClick={() => handleAddJudge(user.id)}
-                              disabled={currentEventDetails.judges.some(j => j.user.id === user.id)}
-                            >
-                              {currentEventDetails.judges.some(j => j.user.id === user.id) ? 'Already Judge' : 'Add as Judge'}
-                            </Button>
-                          </TableCell></TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-              {searchUserQuery && searchUserResults.length === 0 && !searchUserLoading && (
-                <p className="text-center text-muted-foreground">No users found for search.</p>
-              )}
+              <EventJudgesManagement
+                eventId={currentEventDetails.id}
+                currentJudges={currentEventDetails.judges}
+                onUpdate={() => fetchEventDetails(currentEventDetails.id)}
+              />
 
             </div>
             <DialogFooter>

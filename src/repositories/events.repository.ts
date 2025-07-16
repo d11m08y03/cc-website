@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import * as schema from "@/db/schema";
 
 export type Event = typeof schema.events.$inferSelect;
-type NewEvent = typeof schema.events.$inferInsert;
+export type NewEvent = typeof schema.events.$inferInsert;
 type DB = DrizzleD1Database<typeof schema>;
 
 export class EventRepository {
@@ -89,7 +89,7 @@ export class EventRepository {
         // Fetch through the junction table to get the full organiser objects
         eventsToOrganisers: {
           with: {
-            organiser: true,
+            user: true,
           },
         },
         // Fetch through the junction table to get the full user objects for participants

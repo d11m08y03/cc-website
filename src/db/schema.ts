@@ -122,6 +122,8 @@ export const events = sqliteTable("events", {
   description: text("description").notNull(),
   eventDate: integer("event_date", { mode: "timestamp" }).notNull(),
   location: text("location"),
+  poster: text("poster"), // New poster column
+  isActive: int("is_active", { mode: "boolean" }).default(true).notNull(), // New isActive column
   createdAt: integer("created_at", { mode: "timestamp" })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
@@ -278,11 +280,27 @@ export const eventJudgesRelations = relations(eventJudges, ({ one }) => ({
   }),
 }));
 
-export const userRelations = relations(users, ({ many }) => ({
+export const userRelations = relations(users, ({ many, one }) => ({
   appLogs: many(appLogs),
-  accounts: many(accounts),
-  sessions: many(sessions),
+  accounts: many(accounts, { relationName: "user_accounts" }), // Explicit relationName
+  sessions: many(sessions, { relationName: "user_sessions" }), // Explicit relationName
   eventParticipants: many(eventParticipants),
   eventJudges: many(eventJudges),
   eventsToOrganisers: many(eventsToOrganisers),
+}));
+
+export const accountRelations = relations(accounts, ({ one }) => ({
+  user: one(users, {
+    fields: [accounts.userId],
+    references: [users.id],
+    relationName: "user_accounts", // Match relationName
+  }),
+}));
+
+export const sessionRelations = relations(sessions, ({ one }) => ({
+  user: one(users, {
+    fields: [sessions.userId],
+    references: [users.id],
+    relationName: "user_sessions", // Match relationName
+  }),
 }));

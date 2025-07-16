@@ -8,12 +8,14 @@ export const createEventSchema = z.object({
     .datetime("Event date must be a valid date-time string.")
     .transform((str) => new Date(str)),
   location: z.string().min(1, "Event location is required."),
+  poster: z.string().url("Invalid URL format.").optional().or(z.literal("")),
+  isActive: z.boolean().default(true),
 });
 
 export const updateEventSchema = createEventSchema.partial();
 
 export const assignOrganiserSchema = z.object({
-  userId: z.string().min(1, "User ID is required."), // Changed from organiserId to userId
+  userId: z.string().min(1, "User ID is required."),
 });
 
 export const assignJudgeSchema = z.object({

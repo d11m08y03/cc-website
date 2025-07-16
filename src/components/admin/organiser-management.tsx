@@ -43,9 +43,9 @@ export function OrganiserManagement() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<UserAsOrganiser | null>(null);
-  const [searchQuery, setSearchQuery] = useState(''); // Added
-  const [searchResults, setSearchResults] = useState<UserAsOrganiser[]>([]); // Added
-  const [searchLoading, setSearchLoading] = useState(false); // Added
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<UserAsOrganiser[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
 
   const fetchOrganisers = async () => {
     setLoading(true);
@@ -65,7 +65,8 @@ export function OrganiserManagement() {
     } catch (err: any) {
       setError(err.message);
       toast.error(`Error fetching organisers: ${err.message}`);
-    } finally {
+    }
+    finally {
       setLoading(false);
     }
   };
@@ -112,7 +113,7 @@ export function OrganiserManagement() {
     }
   };
 
-  const handleSearchUsers = async () => { // Added
+  const handleSearchUsers = async () => {
     if (!searchQuery) return;
     setSearchLoading(true);
     try {
@@ -128,7 +129,8 @@ export function OrganiserManagement() {
       }
     } catch (err: any) {
       toast.error(`Error searching users: ${err.message}`);
-    } finally {
+    }
+    finally {
       setSearchLoading(false);
     }
   };
@@ -153,16 +155,12 @@ export function OrganiserManagement() {
         </TableHeader>
         <TableBody>
           {organisers.map((organiser) => (
-            <TableRow key={organiser.id}>
-              <TableCell className="font-medium">{organiser.name}</TableCell>
-              <TableCell>{organiser.email}</TableCell>
-              <TableCell>
+            <TableRow key={organiser.id}><TableCell className="font-medium">{organiser.name}</TableCell><TableCell>{organiser.email}</TableCell><TableCell>
                 <Avatar className="h-9 w-9">
                   <AvatarImage src={organiser.image || ''} alt={organiser.name || 'User'} />
                   <AvatarFallback>{organiser.name?.[0] || 'U'}</AvatarFallback>
                 </Avatar>
-              </TableCell>
-              <TableCell>
+              </TableCell><TableCell>
                 <Button
                   variant="destructive"
                   size="sm"
@@ -170,8 +168,7 @@ export function OrganiserManagement() {
                 >
                   Remove as Organiser
                 </Button>
-              </TableCell>
-            </TableRow>
+              </TableCell></TableRow>
           ))}
         </TableBody>
       </Table>
@@ -245,10 +242,7 @@ export function OrganiserManagement() {
                 </TableHeader>
                 <TableBody>
                   {searchResults.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell>{user.name}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>
+                    <TableRow key={user.id}><TableCell>{user.name}</TableCell><TableCell>{user.email}</TableCell><TableCell>
                         <Button
                           variant="outline"
                           size="sm"
@@ -257,8 +251,7 @@ export function OrganiserManagement() {
                         >
                           {user.isOrganiser ? 'Already Organiser' : 'Set as Organiser'}
                         </Button>
-                      </TableCell>
-                    </TableRow>
+                      </TableCell></TableRow>
                   ))}
                 </TableBody>
               </Table>
