@@ -93,3 +93,30 @@ export class JudgeNotAssignedError extends AppError {
     super(message);
   }
 }
+
+/**
+ * Thrown when an operation is attempted on a sponsor that does not exist.
+ */
+export class SponsorNotFoundError extends AppError {
+  constructor(message = "Sponsor not found.") {
+    super(message);
+  }
+}
+
+/**
+ * Thrown when attempting to assign a sponsor who is already assigned to an event.
+ */
+export class SponsorAlreadyAssignedError extends AppError {
+  constructor(message = "This sponsor is already assigned to this event.") {
+    super(message);
+  }
+}
+
+/**
+ * Thrown when attempting to remove a sponsor who is not assigned to an event.
+ */
+export class SponsorNotAssignedError extends AppError {
+  constructor(message = "This sponsor is not assigned to this event.") {
+    super(message);
+  }
+}

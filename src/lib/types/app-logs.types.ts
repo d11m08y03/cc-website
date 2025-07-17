@@ -19,7 +19,7 @@ export type LogData = {
   // The part of the app generating the log (e.g., 'UserService', 'API:/events').
   context?: string;
   // Any extra structured data to aid debugging.
-  meta?: object;
+  meta?: { [key: string]: unknown };
   // The ID of the user who initiated the action, if applicable.
   userId?: string;
 };

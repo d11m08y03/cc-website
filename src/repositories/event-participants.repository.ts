@@ -2,8 +2,7 @@ import type { DrizzleD1Database } from "drizzle-orm/d1";
 import { eq, and } from "drizzle-orm";
 import * as schema from "@/db/schema";
 
-type EventParticipant = typeof schema.eventParticipants.$inferSelect;
-type NewEventParticipant = typeof schema.eventParticipants.$inferInsert;
+export type EventParticipant = typeof schema.eventParticipants.$inferSelect;
 type DB = DrizzleD1Database<typeof schema>;
 
 export class EventParticipantRepository {

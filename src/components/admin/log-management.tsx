@@ -1,9 +1,8 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -38,18 +37,21 @@ export function LogManagement() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState({
-    level: 'all',
-    correlationId: '',
-    userId: '',
+    level: "all",
+    correlationId: "",
+    userId: "",
   });
 
-  const fetchLogs = async () => {
+  const fetchLogs = React.useCallback(async () => {
     setLoading(true);
     setError(null);
+
     try {
       const queryParams = new URLSearchParams();
-      if (filters.level && filters.level !== 'all') queryParams.append("level", filters.level);
-      if (filters.correlationId) queryParams.append("correlationId", filters.correlationId);
+      if (filters.level && filters.level !== "all")
+        queryParams.append("level", filters.level);
+      if (filters.correlationId)
+        queryParams.append("correlationId", filters.correlationId);
       if (filters.userId) queryParams.append("userId", filters.userId);
 
       const response = await fetch(`/api/logs?${queryParams.toString()}`);
@@ -69,11 +71,11 @@ export function LogManagement() {
     } finally {
       setLoading(false);
     }
-  };
+  });
 
   useEffect(() => {
     fetchLogs();
-  }, [filters]);
+  }, [filters, toast.error]);
 
   const handleFilterChange = (name: string, value: string) => {
     setFilters((prev) => ({ ...prev, [name]: value }));
@@ -92,7 +94,10 @@ export function LogManagement() {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <div>
-          <Select value={filters.level} onValueChange={(value) => handleFilterChange("level", value)}>
+          <Select
+            value={filters.level}
+            onValueChange={(value) => handleFilterChange("level", value)}
+          >
             <SelectTrigger id="log-level">
               <SelectValue placeholder="Select a level" />
             </SelectTrigger>
@@ -110,7 +115,9 @@ export function LogManagement() {
             id="correlation-id"
             placeholder="Filter by Correlation ID"
             value={filters.correlationId}
-            onChange={(e) => handleFilterChange("correlationId", e.target.value)}
+            onChange={(e) =>
+              handleFilterChange("correlationId", e.target.value)
+            }
           />
         </div>
         <div>
@@ -123,9 +130,12 @@ export function LogManagement() {
         </div>
       </div>
 
-      <div className="rounded-md border overflow-auto max-h-[500px]"> {/* Scrollable container */}
+      <div className="rounded-md border overflow-auto max-h-[500px]">
+        {" "}
+        {/* Scrollable container */}
         <Table>
-          <TableHeader className="sticky top-0 bg-background">{/* Sticky header */}
+          <TableHeader className="sticky top-0 bg-background">
+            {/* Sticky header */}
             <TableRow>
               <TableHead>Timestamp</TableHead>
               <TableHead>Level</TableHead>
@@ -139,11 +149,24 @@ export function LogManagement() {
           <TableBody>
             {logs.length > 0 ? (
               logs.map((log) => (
-                <TableRow key={log.id}><TableCell>{new Date(log.timestamp * 1000).toLocaleString()}</TableCell><TableCell>{log.level}</TableCell><TableCell>{log.message}</TableCell><TableCell>{log.context || 'N/A'}</TableCell><TableCell>{log.userId || 'N/A'}</TableCell><TableCell>{log.correlationId || 'N/A'}</TableCell><TableCell className="text-xs">{log.meta || 'N/A'}</TableCell></TableRow>
+                <TableRow key={log.id}>
+                  <TableCell>
+                    {new Date(log.timestamp * 1000).toLocaleString()}
+                  </TableCell>
+                  <TableCell>{log.level}</TableCell>
+                  <TableCell>{log.message}</TableCell>
+                  <TableCell>{log.context || "N/A"}</TableCell>
+                  <TableCell>{log.userId || "N/A"}</TableCell>
+                  <TableCell>{log.correlationId || "N/A"}</TableCell>
+                  <TableCell className="text-xs">{log.meta || "N/A"}</TableCell>
+                </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={7} className="text-center text-muted-foreground">
+                <TableCell
+                  colSpan={7}
+                  className="text-center text-muted-foreground"
+                >
                   No logs found matching the criteria.
                 </TableCell>
               </TableRow>

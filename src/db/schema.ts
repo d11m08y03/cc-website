@@ -120,11 +120,12 @@ export const events = sqliteTable("events", {
     .default(sql`(lower(hex(randomblob(16))))`),
   name: text("name").notNull(),
   description: text("description").notNull(),
-  eventDate: integer("event_date", { mode: "timestamp" }).notNull(),
+  start_date: integer("start_date", { mode: "timestamp" }).notNull(),
+  end_date: integer("end_date", { mode: "timestamp" }).notNull(),
   location: text("location"),
   poster: text("poster"), // New poster column
-  isActive: int("is_active", { mode: "boolean" }).default(true).notNull(), // New isActive column
-  createdAt: integer("created_at", { mode: "timestamp" })
+  is_active: int("is_active", { mode: "boolean" }).default(true).notNull(), // New isActive column
+  created_at: integer("created_at", { mode: "timestamp" })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
 });
@@ -142,6 +143,34 @@ export const eventTeams = sqliteTable("event_teams", {
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
 });
+
+export const sponsors = sqliteTable("sponsors", {
+  id: text("id")
+    .primaryKey()
+    .notNull()
+    .default(sql`(lower(hex(randomblob(16))))`),
+  name: text("name").notNull(),
+  description: text("description"),
+  logo: text("logo"),
+  created_at: integer("created_at", { mode: "timestamp" })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+});
+
+export const eventsToSponsors = sqliteTable(
+  "events_to_sponsors",
+  {
+    event_id: text("event_id")
+      .notNull()
+      .references(() => events.id, { onDelete: "cascade" }),
+    sponsor_id: text("sponsor_id")
+      .notNull()
+      .references(() => sponsors.id, { onDelete: "cascade" }),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.event_id, t.sponsor_id] }),
+  }),
+);
 
 // This table handles the one-to-many relationship: one event -> many photos
 export const eventPhotos = sqliteTable("event_photos", {
@@ -170,6 +199,21 @@ export const eventsToOrganisers = sqliteTable(
   // Composite primary key ensures each event-organiser pair is unique
   (t) => ({
     pk: primaryKey({ columns: [t.eventId, t.userId] }), // Changed organiserId to userId
+  }),
+);
+
+export const eventsToParticipants = sqliteTable(
+  "events_to_participants",
+  {
+    eventId: text("event_id")
+      .notNull()
+      .references(() => events.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.eventId, t.userId] }),
   }),
 );
 
@@ -235,9 +279,11 @@ export const appLogRelations = relations(appLogs, ({ one }) => ({
 export const eventRelations = relations(events, ({ many }) => ({
   eventPhotos: many(eventPhotos),
   eventsToOrganisers: many(eventsToOrganisers),
+  eventsToParticipants: many(eventsToParticipants),
   participants: many(eventParticipants),
   judges: many(eventJudges),
   teams: many(eventTeams),
+  eventsToSponsors: many(eventsToSponsors),
 }));
 
 export const eventTeamRelations = relations(eventTeams, ({ one, many }) => ({
@@ -269,6 +315,34 @@ export const eventsToOrganisersRelations = relations(
   }),
 );
 
+export const eventsToParticipantsRelations = relations(
+  eventsToParticipants,
+  ({ one }) => ({
+    event: one(events, {
+      fields: [eventsToParticipants.eventId],
+      references: [events.id],
+    }),
+    user: one(users, {
+      fields: [eventsToParticipants.userId],
+      references: [users.id],
+    }),
+  }),
+);
+
+export const eventsToSponsorsRelations = relations(
+  eventsToSponsors,
+  ({ one }) => ({
+    event: one(events, {
+      fields: [eventsToSponsors.event_id],
+      references: [events.id],
+    }),
+    sponsor: one(sponsors, {
+      fields: [eventsToSponsors.sponsor_id],
+      references: [sponsors.id],
+    }),
+  }),
+);
+
 export const eventJudgesRelations = relations(eventJudges, ({ one }) => ({
   event: one(events, {
     fields: [eventJudges.eventId],
@@ -287,6 +361,11 @@ export const userRelations = relations(users, ({ many, one }) => ({
   eventParticipants: many(eventParticipants),
   eventJudges: many(eventJudges),
   eventsToOrganisers: many(eventsToOrganisers),
+  eventsToParticipants: many(eventsToParticipants),
+}));
+
+export const sponsorsRelations = relations(sponsors, ({ many }) => ({
+  eventsToSponsors: many(eventsToSponsors),
 }));
 
 export const accountRelations = relations(accounts, ({ one }) => ({

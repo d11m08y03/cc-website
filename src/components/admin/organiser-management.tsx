@@ -62,7 +62,7 @@ export function OrganiserManagement() {
         setError(data.error.message);
         toast.error(`Failed to fetch organisers: ${data.error.message}`);
       }
-    } catch (err: any) {
+    } catch (err: Error) {
       setError(err.message);
       toast.error(`Error fetching organisers: ${err.message}`);
     }
@@ -104,7 +104,7 @@ export function OrganiserManagement() {
       } else {
         toast.error(`Failed to update organiser status: ${data.error.message}`);
       }
-    } catch (err: any) {
+    } catch (err: Error) {
       if (err instanceof ZodError) {
         toast.error(err.issues[0].message);
       } else {
@@ -127,7 +127,7 @@ export function OrganiserManagement() {
       } else {
         toast.error(`Failed to search users: ${data.error.message}`);
       }
-    } catch (err: any) {
+    } catch (err: Error) {
       toast.error(`Error searching users: ${err.message}`);
     }
     finally {
@@ -184,7 +184,7 @@ export function OrganiserManagement() {
             <DialogHeader>
               <DialogTitle>Edit Organiser Status</DialogTitle>
               <DialogDescription>
-                Toggle {currentUser.name}'s organiser status.
+                Toggle {currentUser.name}&apos;s organiser status.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">

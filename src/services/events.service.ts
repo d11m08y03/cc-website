@@ -1,10 +1,8 @@
-import { db } from "@/db/client";
-import { LogData } from "@/lib/types/app-logs.types";
-import { logger } from "@/services/app-logs.service";
-
 import { EventRepository, Event } from "@/repositories/events.repository";
 import { EventParticipantRepository } from "@/repositories/event-participants.repository";
 import { EventJudgeRepository } from "@/repositories/event-judges.repository";
+import { EventSponsorRepository } from "@/repositories/event-sponsors.repository";
+import { SponsorRepository } from "@/repositories/sponsors.repository";
 
 import { EventTeamRepository } from "@/repositories/event-teams.repository";
 import { UserRepository } from "@/repositories/users.repository";
@@ -20,8 +18,15 @@ import {
   OrganiserNotAssignedError,
   JudgeAlreadyAssignedError,
   JudgeNotAssignedError,
+  SponsorAlreadyAssignedError,
+  SponsorNotAssignedError,
+	SponsorNotFoundError,
 } from "@/lib/errors/event.errors";
 import { EventOrganiserRepository } from "@/repositories/event-organisers.repository";
+
+import { db } from "@/db/client";
+import { logger } from "@/services/app-logs.service";
+import { LogData } from "@/lib/types/app-logs.types";
 
 /**
  * Service for handling all business logic related to events.
@@ -35,14 +40,18 @@ export class EventService {
   private userRepo: UserRepository;
   private eventJudgeRepo: EventJudgeRepository;
   private eventOrganiserRepo: EventOrganiserRepository;
+  private eventSponsorRepo: EventSponsorRepository;
+  private sponsorRepo: SponsorRepository;
 
   constructor() {
     this.eventRepo = new EventRepository(db);
     this.eventParticipantRepo = new EventParticipantRepository(db);
     this.eventOrganiserRepo = new EventOrganiserRepository(db);
-		this.eventJudgeRepo = new EventJudgeRepository(db);
+    this.eventJudgeRepo = new EventJudgeRepository(db);
     this.eventTeamRepo = new EventTeamRepository(db);
     this.userRepo = new UserRepository(db);
+    this.eventSponsorRepo = new EventSponsorRepository(db);
+    this.sponsorRepo = new SponsorRepository(db);
   }
 
   /**
@@ -52,14 +61,26 @@ export class EventService {
    * @returns The newly created event object.
    */
   public async createEvent(
-    eventData: Omit<Event, "id" | "createdAt">,
+    eventData: Omit<Event, "id" | "createdAt" | "isActive"> & {
+      isActive: boolean;
+      startDate: Date;
+      endDate: Date;
+    },
     logData: Omit<LogData, "meta">,
   ) {
     logger.info("Creating new event.", {
       ...logData,
       context: "EventService:createEvent",
     });
-    const newEvent = await this.eventRepo.create(eventData);
+    const newEvent = await this.eventRepo.create({
+      name: eventData.name,
+      description: eventData.description,
+      start_date: eventData.startDate,
+      end_date: eventData.endDate,
+      location: eventData.location,
+      poster: eventData.poster,
+      is_active: eventData.isActive,
+    });
     logger.info("Successfully created event.", {
       ...logData,
       context: "EventService:createEvent",
@@ -78,7 +99,13 @@ export class EventService {
    */
   public async updateEvent(
     eventId: string,
-    eventData: Partial<Omit<Event, "id">>,
+    eventData: Partial<
+      Omit<Event, "id" | "createdAt"> & {
+        startDate: Date;
+        endDate: Date;
+        isActive: boolean;
+      }
+    >,
     logData: Omit<LogData, "meta">,
   ) {
     logger.info("Updating event.", {
@@ -86,7 +113,15 @@ export class EventService {
       context: "EventService:updateEvent",
       meta: { eventId },
     });
-    const updatedEvent = await this.eventRepo.update(eventId, eventData);
+    const updatedEvent = await this.eventRepo.update(eventId, {
+      name: eventData.name,
+      description: eventData.description,
+      start_date: eventData.startDate,
+      end_date: eventData.endDate,
+      location: eventData.location,
+      poster: eventData.poster,
+      is_active: eventData.isActive,
+    });
 
     if (!updatedEvent) {
       logger.warn("Event not found for update.", {
@@ -501,6 +536,94 @@ export class EventService {
       ...logData,
       context,
       userId,
+    });
+  }
+
+  /**
+   * Assigns an existing user to be a sponsor for a specific event.
+   * @param eventId The ID of the event.
+   * @param sponsorId The ID of the sponsor to assign.
+   * @param logData Contextual data for logging.
+   * @throws {EventNotFoundError}
+   * @throws {SponsorNotFoundError}
+   * @throws {SponsorAlreadyAssignedError}
+   */
+  public async addSponsorToEvent(
+    eventId: string,
+    sponsorId: string,
+    logData: Omit<LogData, "meta" | "userId">,
+  ): Promise<void> {
+    const context = "EventService:addSponsorToEvent";
+    const meta = { eventId, sponsorId };
+    logger.info("Attempting to assign sponsor to event.", {
+      ...logData,
+      context,
+      meta,
+    });
+
+    // Concurrently verify that both the event and sponsor exist.
+    const [event, sponsor] = await Promise.all([
+      this.eventRepo.findById(eventId),
+      this.sponsorRepo.findById(sponsorId),
+    ]);
+
+    if (!event) throw new EventNotFoundError();
+    if (!sponsor) throw new SponsorNotFoundError();
+
+    // Check if the sponsor is already assigned to this event.
+    const existingSponsors =
+      await this.eventSponsorRepo.findSponsorsByEvent(eventId);
+    if (existingSponsors.some((s) => s.sponsor.id === sponsorId)) {
+      throw new SponsorAlreadyAssignedError();
+    }
+
+    // Create the link.
+    await this.eventSponsorRepo.addSponsorToEvent(eventId, sponsorId);
+    logger.info("Successfully assigned sponsor to event.", {
+      ...logData,
+      context,
+    });
+  }
+
+  /**
+   * Removes a sponsor's assignment from a specific event.
+   * @param eventId The ID of the event.
+   * @param sponsorId The ID of the sponsor to un-assign.
+   * @param logData Contextual data for logging.
+   * @throws {SponsorNotAssignedError} If the sponsor was not assigned to the event.
+   */
+  public async removeSponsorFromEvent(
+    eventId: string,
+    sponsorId: string,
+    logData: Omit<LogData, "meta" | "userId">,
+  ): Promise<void> {
+    const context = "EventService:removeSponsorFromEvent";
+    const meta = { eventId, sponsorId };
+    logger.info("Attempting to remove sponsor from event.", {
+      ...logData,
+      context,
+      meta,
+    });
+
+    // Attempt to delete the link directly.
+    const deletedLink = await this.eventSponsorRepo.removeSponsorFromEvent(
+      eventId,
+      sponsorId,
+    );
+
+    // Validate that a link was actually deleted.
+    if (!deletedLink) {
+      logger.warn("Remove failed: sponsor was not assigned to this event.", {
+        ...logData,
+        context,
+        meta,
+      });
+      throw new SponsorNotAssignedError();
+    }
+
+    logger.info("Successfully removed sponsor from event.", {
+      ...logData,
+      context,
     });
   }
 

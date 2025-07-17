@@ -74,7 +74,7 @@ export class EventRepository {
 
   /**
    * Finds an event by its ID and includes all its related data:
-   * photos, organisers, participants, and judges.
+   * photos, organisers, participants, judges, and sponsors.
    * This is the primary method for fetching data for an event's detail page.
    * @param id The ID of the event.
    * @returns A rich event object with all relations, or undefined if not found.
@@ -117,6 +117,12 @@ export class EventRepository {
             },
           },
         },
+        // Fetch through the junction table to get the full sponsor objects
+        eventsToSponsors: {
+          with: {
+            sponsor: true,
+          },
+        },
       },
     });
   }
@@ -133,7 +139,7 @@ export class EventRepository {
   }): Promise<Event[]> {
     const { limit = 10, offset = 0 } = options;
     return this.db.query.events.findMany({
-      orderBy: (events, { desc }) => [desc(events.eventDate)],
+      orderBy: (events, { desc }) => [desc(events.start_date)],
       limit,
       offset,
     });
