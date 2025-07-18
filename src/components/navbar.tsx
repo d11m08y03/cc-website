@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { MenuIcon } from "lucide-react";
-import Image from "next/image";
+
 import { toast } from "sonner";
 import { ThemeToggle } from "./theme-toggle";
 
@@ -27,7 +27,7 @@ export function Navbar() {
       if (result?.error) {
         toast.error(`Login failed: ${result.error}`);
       }
-    } catch (error) {
+    } catch {
       toast.error("An unexpected error occurred during login.");
     }
   };
@@ -36,7 +36,7 @@ export function Navbar() {
     try {
       await signOut();
       toast.info("Logged out successfully.");
-    } catch (error) {
+    } catch {
       toast.error("An unexpected error occurred during logout.");
     }
   };
@@ -51,14 +51,6 @@ export function Navbar() {
           <Button variant="ghost" asChild>
             <Link href="/">Home</Link>
           </Button>
-          <Button variant="ghost" asChild>
-            <Link href="/events">Events</Link>
-          </Button>
-          {status === "authenticated" && session?.user?.isAdmin && (
-            <Button variant="ghost" asChild>
-              <Link href="/admin">Admin</Link>
-            </Button>
-          )}
         </div>
       </div>
 
@@ -116,26 +108,6 @@ export function Navbar() {
               <Button variant="ghost" asChild>
                 <Link href="/">Home</Link>
               </Button>
-              <Button variant="ghost" asChild>
-                <Link href="/events">Events</Link>
-              </Button>
-              {status === "authenticated" && session?.user?.isAdmin && (
-                <Button variant="ghost" asChild>
-                  <Link href="/admin">Admin</Link>
-                </Button>
-              )}
-              {status === "authenticated" ? (
-                <>
-                  <Button variant="ghost" asChild>
-                    <Link href="/profile">Profile</Link>
-                  </Button>
-                  <Button variant="ghost" onClick={handleSignOut}>
-                    Log out
-                  </Button>
-                </>
-              ) : (
-                <Button onClick={handleSignIn}>Log In</Button>
-              )}
             </div>
           </SheetContent>
         </Sheet>

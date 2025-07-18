@@ -5,19 +5,7 @@ import { UpcomingEventsSection } from "@/components/upcoming-event";
 import { WhatWeOfferSection } from "@/components/what-we-offer";
 
 export default function Home() {
-	const partnerLogos = [
-		"/Partners/Finam.png",
-		"/Partners/foicdt.png",
-		"/Partners/UILO.png",
-	];
-
-	const sponsorLogos = [
-		"/Sponsors/Aberdeen.png",
-		"/Sponsors/accenture_marketing_logo white.png",
-		"/Sponsors/accenture_marketing_logo.png",
-		"/Sponsors/Emtel_Logo.png",
-		"/Sponsors/mu-swan-logo.webp",
-	];
+	
 
 	return (
 		<>

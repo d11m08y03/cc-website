@@ -6,6 +6,7 @@ import {
   boolean,
   integer,
   jsonb,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { relations, sql } from "drizzle-orm";
 import type { AdapterAccountType } from "@auth/core/adapters"
@@ -183,18 +184,26 @@ export const eventPhotos = pgTable("event_photos", {
 });
 
 
-export const teamDetails = pgTable("team_details", {
-  id: text("id")
-    .primaryKey()
-    .notNull()
-    .$defaultFn(() => sql`gen_random_uuid()`), // Use gen_random_uuid() for PostgreSQL
-  teamName: text("team_name").notNull(),
-  members: jsonb("members").notNull(), // Use jsonb for PostgreSQL
-  projectFile: text("project_file"),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-});
+export const teamDetails = pgTable(
+  "team_details",
+  {
+    id: text("id")
+      .primaryKey()
+      .notNull()
+      .$defaultFn(() => sql`gen_random_uuid()`), // Use gen_random_uuid() for PostgreSQL
+    teamName: text("team_name").notNull(),
+    members: jsonb("members").notNull(), // Use jsonb for PostgreSQL
+    projectFile: text("project_file"),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+  },
+  (table) => {
+    return {
+      userIdIdx: uniqueIndex("team_details_user_id_idx").on(table.userId),
+    };
+  },
+);
 
 
 export const eventPhotoRelations = relations(eventPhotos, ({ one }) => ({
@@ -236,6 +245,13 @@ export const sessionRelations = relations(sessions, ({ one }) => ({
     references: [users.id],
     relationName: "user_sessions",
   }),
+}));
+
+export const userRelations = relations(users, ({ many }) => ({
+  appLogs: many(appLogs),
+  accounts: many(accounts, { relationName: "user_accounts" }),
+  sessions: many(sessions, { relationName: "user_sessions" }),
+  teamDetails: many(teamDetails),
 }));
 
 export const teamDetailsRelations = relations(teamDetails, ({ one }) => ({

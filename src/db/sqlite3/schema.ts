@@ -367,7 +367,7 @@ export const eventJudgesRelations = relations(eventJudges, ({ one }) => ({
   }),
 }));
 
-export const userRelations = relations(users, ({ many, one }) => ({
+export const userRelations = relations(users, ({ many }) => ({
   appLogs: many(appLogs),
   accounts: many(accounts, { relationName: "user_accounts" }), // Explicit relationName
   sessions: many(sessions, { relationName: "user_sessions" }), // Explicit relationName
