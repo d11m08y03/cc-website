@@ -267,6 +267,19 @@ export const eventJudges = sqliteTable(
   (t) => ({ pk: primaryKey({ columns: [t.eventId, t.userId] }) }),
 );
 
+export const teamDetails = sqliteTable("team_details", {
+  id: text("id")
+    .primaryKey()
+    .notNull()
+    .default(sql`(lower(hex(randomblob(16))))`),
+  teamName: text("teamName").notNull(),
+  members: text("members", { mode: "json" }).notNull(),
+  projectFile: text("projectFile"),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+});
+
 export const appLogRelations = relations(appLogs, ({ one }) => ({
   user: one(users, {
     fields: [appLogs.userId],
@@ -362,6 +375,7 @@ export const userRelations = relations(users, ({ many, one }) => ({
   eventJudges: many(eventJudges),
   eventsToOrganisers: many(eventsToOrganisers),
   eventsToParticipants: many(eventsToParticipants),
+  teamDetails: many(teamDetails),
 }));
 
 export const sponsorsRelations = relations(sponsors, ({ many }) => ({
@@ -381,5 +395,12 @@ export const sessionRelations = relations(sessions, ({ one }) => ({
     fields: [sessions.userId],
     references: [users.id],
     relationName: "user_sessions", // Match relationName
+  }),
+}));
+
+export const teamDetailsRelations = relations(teamDetails, ({ one }) => ({
+  user: one(users, {
+    fields: [teamDetails.userId],
+    references: [users.id],
   }),
 }));

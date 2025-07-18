@@ -2,17 +2,9 @@ import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { db } from "@/db/client";
-import { logger } from "@/services/app-logs.service";
-import { randomUUID } from "crypto";
-import { accounts, sessions, users, verificationTokens } from "@/db/schema";
 
 export const handlers = NextAuth({
-  adapter: DrizzleAdapter(db, {
-    usersTable: users,
-    accountsTable: accounts,
-    sessionsTable: sessions,
-    verificationTokensTable: verificationTokens,
-  }),
+  adapter: DrizzleAdapter(db),
 
   providers: [
     GoogleProvider({
@@ -49,26 +41,6 @@ export const handlers = NextAuth({
         session.user.isAdmin = token.isAdmin as boolean;
       }
       return session;
-    },
-  },
-
-  // Add logging for key authentication lifecycle events.
-  events: {
-    async signIn(message) {
-      logger.info("User signed in successfully.", {
-        correlationId: randomUUID(),
-        context: "NextAuth:signIn",
-        userId: message.user.id,
-        meta: { email: message.user.email },
-      });
-    },
-
-    async signOut(message) {
-      logger.info("User signed out.", {
-        correlationId: randomUUID(),
-        userId: message.token.id as string,
-        context: "NextAuth:signOut",
-      });
     },
   },
 });

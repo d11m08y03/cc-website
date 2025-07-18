@@ -1,5 +1,14 @@
 import "dotenv/config";
-import { drizzle } from "drizzle-orm/libsql";
-import * as schema from "./schema";
+import pkg from "pg"; // node-postgres
+import { drizzle } from 'drizzle-orm/node-postgres';
+import * as schema from "./postgres/schema";
 
-export const db = drizzle(process.env.DB_FILE_NAME!, { schema });
+const { Pool } = pkg;
+
+// Create pg Pool with your environment connection string
+const pool = new Pool({
+  connectionString: process.env.AUTH_DRIZZLE_PG!,
+  // other optional config
+});
+
+export const db = drizzle(pool, { schema });

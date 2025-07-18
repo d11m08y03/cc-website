@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { NeonGradientCard } from "./magicui/neon-gradient-card";
+import { RegistrationForm } from "./upcoming-event/RegistrationForm";
 
 export function UpcomingEventsSection() {
   const neonColor = {
@@ -38,9 +39,7 @@ export function UpcomingEventsSection() {
               A collaborative hackathon where participants harness AI agents to
               turn bold app ideas into reality
             </p>
-            <button className="mt-2 w-max bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded shadow">
-              Register Now
-            </button>
+            <RegistrationForm />
           </div>
         </div>
       </NeonGradientCard>

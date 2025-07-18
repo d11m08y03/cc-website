@@ -45,7 +45,6 @@ export function Navbar() {
     <nav className="bg-background border-b px-4 py-2 flex items-center justify-between">
       <div className="flex items-center space-x-4">
         <Link href="/" className="flex items-center space-x-2">
-          <Image src="/next.svg" alt="Club Logo" width={32} height={32} />
           <span className="text-lg font-semibold">Computer Club</span>
         </Link>
         <div className="hidden md:flex space-x-2">
