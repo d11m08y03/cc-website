@@ -1,13 +1,50 @@
+'use client'
 import Image from "next/image";
 import { NeonGradientCard } from "./magicui/neon-gradient-card";
 import { RegistrationForm } from "./upcoming-event/RegistrationForm";
 import { Calendar, MapPin, Clock, Info } from "lucide-react";
+import { Marquee } from "./magicui/marquee";
+import { useEffect, useState } from "react";
 
 export function UpcomingEventsSection() {
-	const neonColor = {
-		firstColor: "#ff1a1a",
-		secondColor: "#ff4d4d",
-	};
+  const neonColor = {
+    firstColor: "#ff1a1a",
+    secondColor: "#ff4d4d",
+  };
+
+  const sponsors = [
+    { logo: "/Sponsors/Aberdeen.png", alt: "Aberdeen" },
+    { logo: "/Sponsors/accenture_marketing_logo.png", alt: "Accenture" },
+    { logo: "/Sponsors/Emtel_Logo.png", alt: "Emtel" },
+    { logo: "/Sponsors/mu-swan-logo.webp", alt: "MU Swan" },
+  ];
+
+  // Countdown timer logic
+  const eventStart = new Date("2025-08-19T09:00:00");
+  const [timeLeft, setTimeLeft] = useState<{days:number, hours:number, minutes:number, seconds:number}>(() => {
+    const diff = eventStart.getTime() - Date.now();
+    return getTimeLeft(diff);
+  });
+
+  function getTimeLeft(diff: number) {
+    let total = Math.max(diff, 0);
+    const days = Math.floor(total / (1000 * 60 * 60 * 24));
+    total -= days * 1000 * 60 * 60 * 24;
+    const hours = Math.floor(total / (1000 * 60 * 60));
+    total -= hours * 1000 * 60 * 60;
+    const minutes = Math.floor(total / (1000 * 60));
+    total -= minutes * 1000 * 60;
+    const seconds = Math.floor(total / 1000);
+    return { days, hours, minutes, seconds };
+  }
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const diff = eventStart.getTime() - Date.now();
+      setTimeLeft(getTimeLeft(diff));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
 	return (
 		<div>
