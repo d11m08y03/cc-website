@@ -107,7 +107,7 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto">
       <div className="text-center mb-10">
         <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl mb-3">
           {teamData?.teamName} Dashboard
@@ -121,11 +121,11 @@ export default function DashboardPage() {
         {/* Team Leader Card */}
         {teamLeader && (
           <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
               <CardTitle className="text-2xl font-bold">Team Leader</CardTitle>
               <User className="h-8 w-8 text-primary" />
             </CardHeader>
-            <CardContent className="pt-4 space-y-2 text-muted-foreground">
+            <CardContent className="space-y-2 text-muted-foreground">
               <p><strong>Full Name:</strong> {teamLeader.fullName}</p>
               <p><strong>Email:</strong> {teamLeader.email}</p>
               <p><strong>Contact:</strong> {teamLeader.contactNumber}</p>
@@ -142,11 +142,11 @@ export default function DashboardPage() {
         {otherMembers && otherMembers.length > 0 && (
           otherMembers.map((member, index) => (
             <Card key={member.id || index} className="shadow-lg hover:shadow-xl transition-shadow duration-300">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
                 <CardTitle className="text-2xl font-bold">Member {index + 1}</CardTitle>
                 <User className="h-8 w-8 text-primary" />
               </CardHeader>
-              <CardContent className="pt-4 space-y-2 text-muted-foreground">
+              <CardContent className="space-y-2 text-muted-foreground">
                 <p><strong>Full Name:</strong> {member.fullName}</p>
                 <p><strong>Email:</strong> {member.email}</p>
                 <p><strong>Contact:</strong> {member.contactNumber}</p>
@@ -162,7 +162,7 @@ export default function DashboardPage() {
 
         {/* Project File Card */}
         <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <CardTitle className="text-2xl font-bold">Project Submission</CardTitle>
             <FileText className="h-8 w-8 text-primary" />
           </CardHeader>
