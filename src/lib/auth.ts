@@ -35,7 +35,6 @@ export const handlers = NextAuth({
      */
     async session({ session, token }) {
       if (session.user) {
-        // @ts-expect-error - Augmenting the session object
         session.user.id = token.id as string;
         // @ts-expect-error - Augmenting the session object
         session.user.isAdmin = token.isAdmin as boolean;
