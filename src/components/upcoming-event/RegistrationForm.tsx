@@ -89,6 +89,7 @@ const Step1 = ({
           <SelectValue placeholder="Select number of people" />
         </SelectTrigger>
         <SelectContent>
+          <SelectItem value="1">1</SelectItem>
           <SelectItem value="3">3</SelectItem>
           <SelectItem value="4">4</SelectItem>
           <SelectItem value="5">5</SelectItem>
@@ -312,21 +313,28 @@ const Step3 = ({ prevStep, nextStep, setProjectFile, setProjectFileName }: any) 
 };
 
 const Step4 = ({ prevStep, teamData, handleSubmit }: any) => (
-  <div>
-    <Card>
+  <div className="w-full p-4 sm:p-8 flex justify-center">
+    <Card className="w-full max-w-3xl h-[600px] flex flex-col">
+      {/* Header */}
       <CardHeader>
         <div className="flex items-center gap-2">
           <CheckCircle className="w-6 h-6" />
           <CardTitle>Review Your Information</CardTitle>
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="mb-4">
+
+      {/* Scrollable Content */}
+      <CardContent className="overflow-y-auto flex-1 space-y-4 pr-2">
+        {/* Team Name */}
+        <div>
           <h4 className="font-semibold">Team Name</h4>
           <p>{teamData.teamName}</p>
         </div>
+
         <Separator />
-        <div className="mt-4">
+
+        {/* Members */}
+        <div>
           <h4 className="font-semibold">Members</h4>
           {teamData.members.map((member: any, index: number) => (
             <div key={index} className="mt-2">
@@ -345,21 +353,24 @@ const Step4 = ({ prevStep, teamData, handleSubmit }: any) => (
             </div>
           ))}
         </div>
+
         <Separator />
-        <div className="mt-4">
+
+        {/* Project File */}
+        <div>
           <h4 className="font-semibold">Project File</h4>
-          <p>
-            {teamData.projectFile ? "File uploaded (Base64)" : "Not provided"}
-          </p>
+          <p>{teamData.projectFile ? "File uploaded (Base64)" : "Not provided"}</p>
         </div>
       </CardContent>
+
+      {/* Buttons at bottom */}
+      <div className="p-4 border-t flex justify-between">
+        <Button onClick={prevStep}>
+          <ArrowLeft className="w-4 h-4 mr-2" /> Back
+        </Button>
+        <Button onClick={handleSubmit}>Submit</Button>
+      </div>
     </Card>
-    <div className="flex justify-between mt-4">
-      <Button onClick={prevStep}>
-        <ArrowLeft className="w-4 h-4 mr-2" /> Back
-      </Button>
-      <Button onClick={handleSubmit}>Submit</Button>
-    </div>
   </div>
 );
 
