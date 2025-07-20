@@ -32,8 +32,9 @@ import {
   Pencil,
 } from "lucide-react";
 import { z } from "zod";
-import { useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { toast } from "sonner";
+import Link from "next/link";
 
 const memberSchema = z.object({
   fullName: z.string().min(1, "This field cannot be blank"),
@@ -311,65 +312,19 @@ const Step3 = ({ prevStep, nextStep, setProjectFile, setProjectFileName }: any) 
   );
 };
 
-const Step4 = ({ prevStep, teamData, handleSubmit }: any) => (
-  <div className="w-full pt-4 flex justify-center">
-    <Card className="w-full max-w-3xl h-[600px] flex flex-col">
-      {/* Header */}
-      <CardHeader>
-        <div className="flex items-center gap-2">
-          <CheckCircle className="w-6 h-6" />
-          <CardTitle>Review Your Information</CardTitle>
-        </div>
-      </CardHeader>
-
-      {/* Scrollable Content */}
-      <CardContent className="overflow-y-auto flex-1 space-y-4 pr-2">
-        {/* Team Name */}
-        <div>
-          <h4 className="font-semibold">Team Name</h4>
-          <p>{teamData.teamName}</p>
-        </div>
-
-        <Separator />
-
-        {/* Members */}
-        <div>
-          <h4 className="font-semibold">Members</h4>
-          {teamData.members.map((member: any, index: number) => (
-            <div key={index} className="mt-2">
-              <p className="font-semibold">
-                {index === 0 ? "Team Leader" : `Member ${index + 1}`}
-              </p>
-              <p>Full Name: {member.fullName}</p>
-              <p>Email: {member.email}</p>
-              <p>Contact: {member.contactNumber}</p>
-              <p>Food Preference: {member.foodPreference}</p>
-              <p>Allergies: {member.allergies || "None"}</p>
-              <p>T-Shirt Size: {member.tshirtSize}</p>
-              {index < teamData.members.length - 1 && (
-                <Separator className="my-2" />
-              )}
-            </div>
-          ))}
-        </div>
-
-        <Separator />
-
-        {/* Project File */}
-        <div>
-          <h4 className="font-semibold">Project File</h4>
-          <p>{teamData.projectFile ? "File uploaded (Base64)" : "Not provided"}</p>
-        </div>
-      </CardContent>
-      {/* Buttons at bottom */}
-      <div className="p-4 border-t flex justify-between">
-        <Button onClick={prevStep}>
-          <ArrowLeft className="w-4 h-4" />
-        </Button>
-        <Button onClick={handleSubmit}>Submit</Button>
-      </div>
-
-    </Card>
+const Step4 = ({ prevStep, handleSubmit }: any) => (
+  <div className="w-full pt-4 flex flex-col items-center justify-center text-center p-4">
+    <CheckCircle className="w-16 h-16 text-green-500 mb-4" />
+    <h2 className="text-2xl font-semibold mb-2">Confirm Your Registration</h2>
+    <p className="text-lg mb-4">
+      Please confirm your registration. You will be able to edit your information at any time after registration.
+    </p>
+    <div className="p-4 border-t flex justify-between w-full mt-auto">
+      <Button onClick={prevStep}>
+        <ArrowLeft className="w-4 h-4" />
+      </Button>
+      <Button onClick={handleSubmit}>Confirm and Register</Button>
+    </div>
   </div>
 );
 
@@ -384,6 +339,32 @@ export function RegistrationForm() {
   const [errors, setErrors] = useState<any>({});
   const { data: session, status } = useSession();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [hasRegisteredTeam, setHasRegisteredTeam] = useState(false);
+  const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
+
+  useEffect(() => {
+    const checkRegistrationStatus = async () => {
+      if (status === "authenticated") {
+        try {
+          const response = await fetch("/api/registration-status");
+          if (response.ok) {
+            const data = await response.json();
+            setHasRegisteredTeam(data.isRegistered);
+          } else {
+            console.error("Failed to fetch registration status");
+            setHasRegisteredTeam(false);
+          }
+        } catch (error) {
+          console.error("Error fetching registration status:", error);
+          setHasRegisteredTeam(false);
+        }
+      } else {
+        setHasRegisteredTeam(false);
+      }
+    };
+
+    checkRegistrationStatus();
+  }, [session, status]);
 
   useEffect(() => {
     // Ensure members array is correctly sized when numPeople changes
@@ -469,6 +450,9 @@ export function RegistrationForm() {
         body: JSON.stringify(teamData),
       });
 
+			console.log(teamData);
+			
+
       if (response.ok) {
         toast.success("Registration submitted successfully!");
         setIsDialogOpen(false); // Close the dialog on success
@@ -546,10 +530,23 @@ export function RegistrationForm() {
       setProjectFileName(null);
       setErrors({});
     } else if (status === "unauthenticated") {
-      toast.error("Please log in to register for the event.");
+      setIsLoginPromptOpen(true); // Open login prompt instead of registration form
       return; // Prevent dialog from opening
     }
     setIsDialogOpen(open);
+  };
+
+  const handleLogin = async () => {
+    try {
+      const result = await signIn("google");
+      if (result?.error) {
+        toast.error(`Login failed: ${result.error}`);
+      } else {
+        setIsLoginPromptOpen(false); // Close login prompt on successful login
+      }
+    } catch {
+      toast.error("An unexpected error occurred during login.");
+    }
   };
 
   const neonColor = {
@@ -558,27 +555,47 @@ export function RegistrationForm() {
   };
 
   return (
-    <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <Button className="w-full cursor-pointer" disabled={status === "loading"}>
-          Register Now
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] p-0">
-        <NeonGradientCard neonColors={neonColor}>
-          <div className="p-4">
-            <DialogHeader>
-              <DialogTitle>
-                Event Registration -{" "}
-                {step === 2
-                  ? `Member ${currentMember + 1} of ${numPeople}`
-                  : `Step ${step} of 4`}
-              </DialogTitle>
-            </DialogHeader>
-            {renderStep()}
+    <>
+      <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
+        <DialogTrigger asChild>
+          {hasRegisteredTeam ? (
+            <Button asChild className="w-full cursor-pointer">
+              <Link href="/dashboard">Go to Dashboard</Link>
+            </Button>
+          ) : (
+            <Button className="w-full cursor-pointer" disabled={status === "loading"}>
+              Register Now
+            </Button>
+          )}
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[600px] p-0">
+          <NeonGradientCard neonColors={neonColor}>
+            <div className="p-4">
+              <DialogHeader>
+                <DialogTitle>
+                  Event Registration -{" "}
+                  {step === 2
+                    ? `Member ${currentMember + 1} of ${numPeople}`
+                    : `Step ${step} of 4`}
+                </DialogTitle>
+              </DialogHeader>
+              {renderStep()}
+            </div>
+          </NeonGradientCard>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isLoginPromptOpen} onOpenChange={setIsLoginPromptOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Login Required</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <p>Please log in to register for the event.</p>
+            <Button onClick={handleLogin}>Login with Google</Button>
           </div>
-        </NeonGradientCard>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

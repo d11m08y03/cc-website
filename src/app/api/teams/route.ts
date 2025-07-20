@@ -24,7 +24,7 @@ const teamDetailsSchema = z.object({
 
 const teamSubmissionSchema = z.object({
 	teamDetails: teamDetailsSchema,
-	members: z.array(memberSchema).min(3).max(5),
+	members: z.array(memberSchema).min(1).max(5),
 });
 
 import { teamMembers } from "@/db/postgres/schema";

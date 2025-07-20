@@ -110,7 +110,7 @@ export function UpcomingEventsSection() {
 								<Clock className="w-5 h-5 mr-2" /> Duration: 7 hours per day
 							</p>
 							<p className="text-sm md:text-lg text-gray-800 dark:text-gray-100 mb-1 md:mb-2 flex items-center">
-								<MapPin className="w-5 h-5 mr-2" /> Location: Powa
+								<MapPin className="w-5 h-5 mr-2" /> Location: Paul Octave Wiehe Auditorium (POWA)
 							</p>
 							<p className="text-sm md:text-lg text-gray-800 dark:text-gray-100 flex items-center mb-1 md:mb-2">
 								<Info className="w-5 h-5 mr-2" /> Submitted proposals will
