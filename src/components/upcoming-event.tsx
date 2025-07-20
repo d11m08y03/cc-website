@@ -164,7 +164,7 @@ export function UpcomingEventsSection() {
 			</NeonGradientCard>
 			{/* Marquee for small screens: below the card */}
 			<div className="block md:hidden mt-4">
-				<div className="text-center font-bold text-xs md:text-base mb-2">UoM Appcup 2025 sponsors</div>
+				<div className="text-center font-bold md:text-base mb-2">UoM Appcup 2025 sponsors</div>
 				<Marquee>
 					<div className="flex items-center gap-8">
 						{sponsors.map((sponsor) => (

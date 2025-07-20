@@ -98,7 +98,7 @@ const Step1 = ({
     </div>
     <div className="flex justify-end mt-4">
       <Button onClick={nextStep}>
-        Next <ArrowRight className="w-4 h-4 ml-2" />
+        <ArrowRight className="w-4 h-4" />
       </Button>
     </div>
   </div>
@@ -247,11 +247,10 @@ const MemberForm = ({
       </div>
       <div className="flex justify-between mt-4">
         <Button onClick={prevStep}>
-          <ArrowLeft className="w-4 h-4 mr-2" /> Back
+          <ArrowLeft className="w-4 h-4" /> 
         </Button>
         <Button onClick={nextStep}>
-          {memberIndex === numPeople - 1 ? "Next" : "Next Member"}{" "}
-          <ArrowRight className="w-4 h-4 ml-2" />
+          <ArrowRight className="w-4 h-4" />
         </Button>
       </div>
     </div>
@@ -302,10 +301,10 @@ const Step3 = ({ prevStep, nextStep, setProjectFile, setProjectFileName }: any) 
       </div>
       <div className="flex justify-between mt-4">
         <Button onClick={prevStep}>
-          <ArrowLeft className="w-4 h-4 mr-2" /> Back
+          <ArrowLeft className="w-4 h-4" />
         </Button>
         <Button onClick={nextStep}>
-          Review <ArrowRight className="w-4 h-4 ml-2" />
+          <ArrowRight className="w-4 h-4" />
         </Button>
       </div>
     </div>
@@ -313,7 +312,7 @@ const Step3 = ({ prevStep, nextStep, setProjectFile, setProjectFileName }: any) 
 };
 
 const Step4 = ({ prevStep, teamData, handleSubmit }: any) => (
-  <div className="w-full p-4 sm:p-8 flex justify-center">
+  <div className="w-full pt-4 flex justify-center">
     <Card className="w-full max-w-3xl h-[600px] flex flex-col">
       {/* Header */}
       <CardHeader>
@@ -362,14 +361,14 @@ const Step4 = ({ prevStep, teamData, handleSubmit }: any) => (
           <p>{teamData.projectFile ? "File uploaded (Base64)" : "Not provided"}</p>
         </div>
       </CardContent>
-
       {/* Buttons at bottom */}
       <div className="p-4 border-t flex justify-between">
         <Button onClick={prevStep}>
-          <ArrowLeft className="w-4 h-4 mr-2" /> Back
+          <ArrowLeft className="w-4 h-4" />
         </Button>
         <Button onClick={handleSubmit}>Submit</Button>
       </div>
+
     </Card>
   </div>
 );
@@ -553,6 +552,11 @@ export function RegistrationForm() {
     setIsDialogOpen(open);
   };
 
+  const neonColor = {
+    firstColor: "#ff1a1a",
+    secondColor: "#ff4d4d",
+  };
+
   return (
     <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
@@ -561,7 +565,7 @@ export function RegistrationForm() {
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px] p-0">
-        <NeonGradientCard>
+        <NeonGradientCard neonColors={neonColor}>
           <div className="p-4">
             <DialogHeader>
               <DialogTitle>
