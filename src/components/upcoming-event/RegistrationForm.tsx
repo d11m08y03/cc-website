@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -29,6 +29,7 @@ import {
   ArrowRight,
   ArrowLeft,
   Upload,
+  Pencil,
 } from "lucide-react";
 import { z } from "zod";
 import { useSession } from "next-auth/react";
@@ -374,6 +375,17 @@ export function RegistrationForm() {
   const { data: session, status } = useSession();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+  useEffect(() => {
+    // Ensure members array is correctly sized when numPeople changes
+    setMembers((prevMembers) => {
+      const newMembers = [...prevMembers];
+      while (newMembers.length < numPeople) {
+        newMembers.push({});
+      }
+      return newMembers.slice(0, numPeople);
+    });
+  }, [numPeople]);
+
   const updateMemberData = (index: number, data: any) => {
     const newMembers = [...members];
     newMembers[index] = data;
@@ -521,6 +533,7 @@ export function RegistrationForm() {
       setMembers([]);
       setCurrentMember(0);
       setProjectFile(null);
+      setProjectFileName(null);
       setErrors({});
     } else if (status === "unauthenticated") {
       toast.error("Please log in to register for the event.");

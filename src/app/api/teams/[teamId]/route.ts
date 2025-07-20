@@ -5,21 +5,20 @@ import { eq } from "drizzle-orm";
 
 export async function GET(
 	req: NextRequest,
-	// The fix is here: type the 'context' object directly
-	{ params }: { params: Promise<{ userId: string }> },
+	{ params }: { params: Promise<{ teamId: string }> },
 ) {
 	try {
-		const userId = (await params).userId
+		const teamId = (await params).teamId;
 
-		if (!userId) {
+		if (!teamId) {
 			return NextResponse.json(
-				{ message: "User ID is required" },
+				{ message: "Team ID is required" },
 				{ status: 400 },
 			);
 		}
 
 		const team = await db.query.teamDetails.findFirst({
-			where: eq(teamDetails.userId, userId),
+			where: eq(teamDetails.userId, teamId),
 		});
 
 		if (!team) {

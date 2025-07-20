@@ -64,7 +64,7 @@ export function UpcomingEventsSection() {
 							alt="CC Event Poster"
 							width={800}
 							height={600}
-							className="object-cover w-full h-full"
+							className="object-cover w-full h-full rounded-lg outline outline-2 outline-red-500"
 							priority
 						/>
 					</div>

@@ -6,8 +6,26 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { User, Users, FileText, Loader2, XCircle, Download } from "lucide-react";
+import {
+  User,
+  Users,
+  FileText,
+  Loader2,
+  XCircle,
+  Download,
+  CheckCircle,
+  Clock,
+  Mail,
+  Phone,
+  Utensils,
+  Shirt,
+  Pencil,
+  UserPlus,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { RegistrationForm } from "@/components/upcoming-event/RegistrationForm";
+import { AddTeamMemberForm } from "@/components/add-team-member-form";
+import { ChangeProposalForm } from "@/components/change-proposal-form";
 
 interface TeamMember {
   id: string;
@@ -28,6 +46,7 @@ interface TeamDetails {
   projectFile: string | null;
   projectFileName: string | null;
   userId: string;
+  approvalStatus: "pending" | "approved" | "rejected";
   teamMembers: TeamMember[];
 }
 
@@ -39,27 +58,27 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
 
   const fetchTeamDetails = async () => {
-      try {
-        const response = await fetch("/api/team-details");
-        if (response.ok) {
-          const data = await response.json();
-          setTeamData(data);
-        } else if (response.status === 404) {
-          setError("Team not found. Please register your team.");
-          toast.info("Team not found. Please register your team.");
-        } else {
-          const errorData = await response.json();
-          setError(errorData.message || "Failed to fetch team details.");
-          toast.error(errorData.message || "Failed to fetch team details.");
-        }
-      } catch (err) {
-        console.error("Error fetching team details:", err);
-        setError("An unexpected error occurred.");
-        toast.error("An unexpected error occurred.");
-      } finally {
-        setLoading(false);
+    try {
+      const response = await fetch("/api/team-details");
+      if (response.ok) {
+        const data = await response.json();
+        setTeamData(data);
+      } else if (response.status === 404) {
+        setError("Team not found. Please register your team.");
+        toast.info("Team not found. Please register your team.");
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || "Failed to fetch team details.");
+        toast.error(errorData.message || "Failed to fetch team details.");
       }
-    };
+    } catch (err) {
+      console.error("Error fetching team details:", err);
+      setError("An unexpected error occurred.");
+      toast.error("An unexpected error occurred.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (status === "loading") return;
@@ -95,7 +114,9 @@ export default function DashboardPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] p-4">
         <Users className="h-12 w-12 text-muted-foreground mb-4" />
-        <p className="text-lg text-muted-foreground text-center">No team data available. Please register your team.</p>
+        <p className="text-lg text-muted-foreground text-center">
+          No team data available. Please register your team.
+        </p>
       </div>
     );
   }
@@ -118,7 +139,51 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        {/* Team Overview Card */}
+        <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+          <CardContent className="pt-2">
+            <p className="flex items-center gap-2 text-2xl font-extrabold text-primary mb-2">
+              <UserPlus className="h-8 w-8 text-primary" /> {teamData?.teamName}
+            </p>
+            <p className="text-lg text-muted-foreground">
+              Total Members: {teamData?.teamMembers.length}
+            </p>
+            {/* Add an edit button for team details here if needed later */}
+          </CardContent>
+        </Card>
+
+        {/* Registration Status Card */}
+        <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+          <CardContent className="pt-2">
+            <p className="flex items-center gap-2 text-3xl font-extrabold mb-2">
+              {teamData?.approvalStatus === "approved" ? (
+                <CheckCircle className="h-8 w-8 text-green-500" />
+              ) : teamData?.approvalStatus === "rejected" ? (
+                <XCircle className="h-8 w-8 text-red-500" />
+              ) : (
+                <Clock className="h-8 w-8 text-yellow-500" />
+              )}
+              <span
+                className={
+                  teamData?.approvalStatus === "approved"
+                    ? "text-green-500"
+                    : teamData?.approvalStatus === "rejected"
+                      ? "text-red-500"
+                      : "text-yellow-500"
+                }
+              >
+                {teamData?.approvalStatus.toUpperCase()}
+              </span>
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Your team's registration approval status.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
         {/* Team Leader Card */}
         {teamLeader && (
           <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
@@ -126,56 +191,104 @@ export default function DashboardPage() {
               <CardTitle className="text-2xl font-bold">Team Leader</CardTitle>
               <User className="h-8 w-8 text-primary" />
             </CardHeader>
-            <CardContent className="space-y-2 text-muted-foreground">
-              <p><strong>Full Name:</strong> {teamLeader.fullName}</p>
-              <p><strong>Email:</strong> {teamLeader.email}</p>
-              <p><strong>Contact:</strong> {teamLeader.contactNumber}</p>
-              <p><strong>Food Preference:</strong> {teamLeader.foodPreference}</p>
-              <p><strong>T-Shirt Size:</strong> {teamLeader.tshirtSize}</p>
+            <CardContent className="pt-4 space-y-2">
+              <p className="flex items-center gap-2">
+                <User className="h-4 w-4 text-primary" />
+                <strong>Name:</strong> {teamLeader.fullName}
+              </p>
+              <p className="flex items-center gap-2">
+                <Mail className="h-4 w-4 text-blue-500" />{" "}
+                <strong>Email:</strong> {teamLeader.email}
+              </p>
+              <p className="flex items-center gap-2">
+                <Phone className="h-4 w-4 text-green-500" />{" "}
+                <strong>Contact:</strong> {teamLeader.contactNumber}
+              </p>
+              <p className="flex items-center gap-2">
+                <Utensils className="h-4 w-4 text-yellow-500" />{" "}
+                <strong>Food Preference:</strong> {teamLeader.foodPreference}
+              </p>
+              <p className="flex items-center gap-2">
+                <Shirt className="h-4 w-4 text-purple-500" />{" "}
+                <strong>T-Shirt Size:</strong> {teamLeader.tshirtSize}
+              </p>
               {teamLeader.allergies && (
-                <p><strong>Allergies:</strong> {teamLeader.allergies}</p>
+                <p className="flex items-center gap-2">
+                  <strong>Allergies:</strong> {teamLeader.allergies}
+                </p>
               )}
             </CardContent>
           </Card>
         )}
 
         {/* Other Members Cards */}
-        {otherMembers && otherMembers.length > 0 && (
+        {otherMembers &&
+          otherMembers.length > 0 &&
           otherMembers.map((member, index) => (
-            <Card key={member.id || index} className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <Card
+              key={member.id || index}
+              className="shadow-lg hover:shadow-xl transition-shadow duration-300"
+            >
               <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                <CardTitle className="text-2xl font-bold">Member {index + 1}</CardTitle>
+                <CardTitle className="text-2xl font-bold">
+                  Member {index + 1}
+                </CardTitle>
                 <User className="h-8 w-8 text-primary" />
               </CardHeader>
-              <CardContent className="space-y-2 text-muted-foreground">
-                <p><strong>Full Name:</strong> {member.fullName}</p>
-                <p><strong>Email:</strong> {member.email}</p>
-                <p><strong>Contact:</strong> {member.contactNumber}</p>
-                <p><strong>Food Preference:</strong> {member.foodPreference}</p>
-                <p><strong>T-Shirt Size:</strong> {member.tshirtSize}</p>
+              <CardContent className="pt-4 space-y-2">
+                <p className="flex items-center gap-2">
+                  <User className="h-4 w-4 text-primary" />
+                  <strong>Name:</strong> {member.fullName}
+                </p>
+                <p className="flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-blue-500" />{" "}
+                  <strong>Email:</strong> {member.email}
+                </p>
+                <p className="flex items-center gap-2">
+                  <Phone className="h-4 w-4 text-green-500" />{" "}
+                  <strong>Contact:</strong> {member.contactNumber}
+                </p>
+                <p className="flex items-center gap-2">
+                  <Utensils className="h-4 w-4 text-yellow-500" />{" "}
+                  <strong>Food Preference:</strong> {member.foodPreference}
+                </p>
+                <p className="flex items-center gap-2">
+                  <Shirt className="h-4 w-4 text-purple-500" />{" "}
+                  <strong>T-Shirt Size:</strong> {member.tshirtSize}
+                </p>
                 {member.allergies && (
-                  <p><strong>Allergies:</strong> {member.allergies}</p>
+                  <p className="flex items-center gap-2">
+                    <strong>Allergies:</strong> {member.allergies}
+                  </p>
                 )}
               </CardContent>
             </Card>
-          ))
-        )}
+          ))}
+      </div>
 
-        {/* Project File Card */}
-        <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+      {/* New row for Project Submission and new button */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        {/* Project Submission Card */}
+        <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 lg:col-span-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-2xl font-bold">Project Submission</CardTitle>
+            <CardTitle className="text-2xl font-bold">
+              Project Submission
+            </CardTitle>
             <FileText className="h-8 w-8 text-primary" />
           </CardHeader>
           <CardContent className="pt-4 space-y-2 text-muted-foreground">
             {teamData?.projectFile ? (
               <>
-                <p><strong>Status:</strong> Submitted</p>
-                <p><strong>File Name:</strong> {teamData.projectFileName}</p>
+                <p>
+                  <strong>Status:</strong> Submitted
+                </p>
+                <p>
+                  <strong>File Name:</strong> {teamData.projectFileName}
+                </p>
                 <Button
                   onClick={() => {
                     if (teamData.projectFile && teamData.projectFileName) {
-                      const link = document.createElement('a');
+                      const link = document.createElement("a");
                       link.href = teamData.projectFile;
                       link.download = teamData.projectFileName;
                       document.body.appendChild(link);
@@ -191,7 +304,30 @@ export default function DashboardPage() {
                 </Button>
               </>
             ) : (
-              <p><strong>Status:</strong> Not yet submitted</p>
+              <p>
+                <strong>Status:</strong> Not yet submitted
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* New Button Card */}
+        <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 lg:col-span-2 flex flex-col items-center justify-center p-4">
+          <CardContent className="w-full h-full flex flex-row items-center justify-center gap-4 p-0">
+            {teamData && (
+              <ChangeProposalForm
+                teamId={teamData.id}
+                initialProjectFile={teamData.projectFile}
+                initialProjectFileName={teamData.projectFileName}
+                onProposalChanged={fetchTeamDetails}
+              />
+            )}
+            {teamData && (
+              <AddTeamMemberForm
+                teamId={teamData.id}
+                currentMemberCount={teamData.teamMembers.length}
+                onMemberAdded={fetchTeamDetails}
+              />
             )}
           </CardContent>
         </Card>
