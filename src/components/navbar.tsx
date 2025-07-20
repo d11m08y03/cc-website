@@ -70,16 +70,17 @@ export function Navbar() {
         <Link href="/" className="flex items-center space-x-2">
           <span className="text-lg font-semibold">Computer Club</span>
         </Link>
-        <div className="hidden md:flex space-x-2">
-          {hasRegisteredTeam && (
-            <Button variant="ghost" asChild>
-              <Link href="/dashboard">My Team</Link>
-            </Button>
-          )}
-        </div>
       </div>
 
       <div className="flex items-center space-x-2 sm:space-x-4">
+        {hasRegisteredTeam && (
+          <>
+            <Button variant="ghost" asChild className="px-2 md:px-4">
+              <Link href="/dashboard">My Team</Link>
+            </Button>
+            <span className="md:hidden text-muted-foreground">|</span>
+          </>
+        )}
         <ThemeToggle />
         {status === "authenticated" ? (
           <DropdownMenu>
@@ -107,10 +108,6 @@ export function Navbar() {
                   </p>
                 </div>
               </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link href="/profile">Profile</Link>
-              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleSignOut}>
                 Log out
