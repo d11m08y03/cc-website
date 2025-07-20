@@ -19,8 +19,13 @@ import {
   Phone,
   Utensils,
   Shirt,
+  Pencil,
+  UserPlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { RegistrationForm } from "@/components/upcoming-event/RegistrationForm";
+import { AddTeamMemberForm } from "@/components/add-team-member-form";
+import { ChangeProposalForm } from "@/components/change-proposal-form";
 
 interface TeamMember {
   id: string;
@@ -136,16 +141,12 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         {/* Team Overview Card */}
-        <Card className="shadow-lg">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-2xl font-bold">Team Overview</CardTitle>
-            <Users className="h-8 w-8 text-primary" />
-          </CardHeader>
+        <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
           <CardContent className="pt-2">
-            <p className="text-lg font-semibold">
-              Team Name: {teamData?.teamName}
+            <p className="flex items-center gap-2 text-2xl font-extrabold text-primary mb-2">
+              <UserPlus className="h-8 w-8 text-primary" /> {teamData?.teamName}
             </p>
-            <p className="text-muted-foreground">
+            <p className="text-lg text-muted-foreground">
               Total Members: {teamData?.teamMembers.length}
             </p>
             {/* Add an edit button for team details here if needed later */}
@@ -153,22 +154,16 @@ export default function DashboardPage() {
         </Card>
 
         {/* Registration Status Card */}
-        <Card className="shadow-lg">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-2xl font-bold">
-              Registration Status
-            </CardTitle>
-            {teamData?.approvalStatus === "approved" ? (
-              <CheckCircle className="h-8 w-8 text-green-500" />
-            ) : teamData?.approvalStatus === "rejected" ? (
-              <XCircle className="h-8 w-8 text-red-500" />
-            ) : (
-              <Clock className="h-8 w-8 text-yellow-500" />
-            )}
-          </CardHeader>
+        <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
           <CardContent className="pt-2">
-            <p className="text-lg font-semibold">
-              Status:{" "}
+            <p className="flex items-center gap-2 text-3xl font-extrabold mb-2">
+              {teamData?.approvalStatus === "approved" ? (
+                <CheckCircle className="h-8 w-8 text-green-500" />
+              ) : teamData?.approvalStatus === "rejected" ? (
+                <XCircle className="h-8 w-8 text-red-500" />
+              ) : (
+                <Clock className="h-8 w-8 text-yellow-500" />
+              )}
               <span
                 className={
                   teamData?.approvalStatus === "approved"
@@ -181,11 +176,14 @@ export default function DashboardPage() {
                 {teamData?.approvalStatus.toUpperCase()}
               </span>
             </p>
+            <p className="text-sm text-muted-foreground">
+              Your team's registration approval status.
+            </p>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
         {/* Team Leader Card */}
         {teamLeader && (
           <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
@@ -194,6 +192,10 @@ export default function DashboardPage() {
               <User className="h-8 w-8 text-primary" />
             </CardHeader>
             <CardContent className="pt-4 space-y-2">
+              <p className="flex items-center gap-2">
+                <User className="h-4 w-4 text-primary" />
+                <strong>Name:</strong> {teamLeader.fullName}
+              </p>
               <p className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-blue-500" />{" "}
                 <strong>Email:</strong> {teamLeader.email}
@@ -235,6 +237,10 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent className="pt-4 space-y-2">
                 <p className="flex items-center gap-2">
+                  <User className="h-4 w-4 text-primary" />
+                  <strong>Name:</strong> {member.fullName}
+                </p>
+                <p className="flex items-center gap-2">
                   <Mail className="h-4 w-4 text-blue-500" />{" "}
                   <strong>Email:</strong> {member.email}
                 </p>
@@ -258,9 +264,12 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
           ))}
+      </div>
 
-        {/* Project File Card */}
-        <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+      {/* New row for Project Submission and new button */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        {/* Project Submission Card */}
+        <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 lg:col-span-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <CardTitle className="text-2xl font-bold">
               Project Submission
@@ -298,6 +307,27 @@ export default function DashboardPage() {
               <p>
                 <strong>Status:</strong> Not yet submitted
               </p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* New Button Card */}
+        <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 lg:col-span-2 flex flex-col items-center justify-center p-4">
+          <CardContent className="w-full h-full flex flex-row items-center justify-center gap-4 p-0">
+            {teamData && (
+              <ChangeProposalForm
+                teamId={teamData.id}
+                initialProjectFile={teamData.projectFile}
+                initialProjectFileName={teamData.projectFileName}
+                onProposalChanged={fetchTeamDetails}
+              />
+            )}
+            {teamData && (
+              <AddTeamMemberForm
+                teamId={teamData.id}
+                currentMemberCount={teamData.teamMembers.length}
+                onMemberAdded={fetchTeamDetails}
+              />
             )}
           </CardContent>
         </Card>

@@ -27,36 +27,39 @@ export function UpcomingEventsSection() {
 							alt="CC Event Poster"
 							width={800}
 							height={600}
-							className="object-cover w-full h-full"
+							className="object-cover w-full h-full rounded-lg outline outline-2 outline-red-500"
 							priority
 						/>
 					</div>
 
-					<div className="w-full md:w-1/2 px-0 md:px-5 flex flex-col justify-between">
-						<div>
-							<h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 mt-4 sm:mt-0">
-								UoM AppCup 2025
-							</h3>
-							<p className="text-gray-800 dark:text-gray-100 text-lg mb-2">
-								A collaborative hackathon where participants harness AI agents
-								to turn bold app ideas into reality.
-							</p>
-							<p className="text-gray-800 dark:text-gray-100 text-lg mb-2 flex items-center">
-								<Calendar className="w-5 h-5 mr-2" /> Date: 19 to 21 August
-							</p>
-							<p className="text-gray-800 dark:text-gray-100 text-lg mb-2 flex items-center">
-								<Clock className="w-5 h-5 mr-2" /> Duration: 7 hours per day
-							</p>
-							<p className="text-gray-800 dark:text-gray-100 text-lg mb-2 flex items-center">
-								<MapPin className="w-5 h-5 mr-2" /> Location: Powa
-							</p>
-							<p className="text-gray-800 dark:text-gray-100 text-lg flex items-center">
-								<Info className="w-5 h-5 mr-2" /> Submitted proposals will
-								be shortlisted.
-							</p>
-						</div>
-						<div className="mt-4 w-full">
-							<RegistrationForm />
+					<div className="w-full md:w-1/2 px-0 flex flex-col justify-between">
+						<div className="px-10">
+							<div>
+								<h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 mt-4 sm:mt-0">
+									UoM AppCup 2025
+								</h3>
+								<p className="text-gray-800 dark:text-gray-100 text-lg mb-2">
+									A collaborative hackathon where participants harness AI agents
+									to turn bold app ideas into reality.
+								</p>
+								<p className="text-gray-800 dark:text-gray-100 text-lg mb-2 flex items-center">
+									<Calendar className="w-5 h-5 mr-2" /> Date: 19 to 21 August
+								</p>
+								<p className="text-gray-800 dark:text-gray-100 text-lg mb-2 flex items-center">
+									<Clock className="w-5 h-5 mr-2" /> Duration: 7 hours per day
+								</p>
+								<p className="text-gray-800 dark:text-gray-100 text-lg mb-2 flex items-center">
+									<MapPin className="w-5 h-5 mr-2" /> Location: Powa
+								</p>
+								<p className="text-gray-800 dark:text-gray-100 text-lg flex items-center">
+									<Info className="w-5 h-5 mr-2" /> Submitted proposals will be
+									shortlisted.
+								</p>
+							</div>
+
+							<div className="mt-4 w-full">
+								<RegistrationForm />
+							</div>
 						</div>
 					</div>
 				</div>

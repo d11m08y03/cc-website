@@ -12,14 +12,14 @@ const tailwindColorClassMap: Record<OffersCardProps["iconColor"], string> = {
   blue: "text-blue-500",
   green: "text-green-500",
   purple: "text-purple-500",
-  red: "text-red-500",
+  red: "text-[#6699ff]",
 };
 
 const neonColorMap: Record<OffersCardProps["iconColor"], string> = {
   blue: "#00bfff",
   green: "#00ff99",
   purple: "#cc66ff",
-  red: "#ff4d4d", // <- This matches your secondColor
+  red: "#6699ff", // <- This matches your secondColor
 };
 
 // Constant reddish-pink neon base

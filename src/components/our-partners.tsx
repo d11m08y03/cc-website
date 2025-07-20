@@ -35,7 +35,7 @@ export function PartnerCard({
 export function OurPartnersSection() {
   const neonColorsList = [
     { firstColor: "#ff2d55", secondColor: "#00bfff" },
-    { firstColor: "#ff4d4d", secondColor: "#ff4d4d" },
+    { firstColor: "#6699ff", secondColor: "#cc66ff" },
     { firstColor: "#ff2d55", secondColor: "#cc66ff" },
   ];
 
