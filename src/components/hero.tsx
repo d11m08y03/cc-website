@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { TextAnimate } from "@/components/magicui/text-animate";
-import { FaFacebook, FaInstagram, FaLinkedin, FaDiscord } from "react-icons/fa";
+import { FaFacebook, FaInstagram, FaLinkedin } from "react-icons/fa";
 
 export default function HeroSection() {
   return (
@@ -32,32 +32,25 @@ export default function HeroSection() {
 
       <div className="flex gap-6 mt-8">
         <a
-          href="https://facebook.com/uomcomputerclub"
+          href="https://www.facebook.com/ComputerClubMU"
           target="_blank"
           rel="noopener noreferrer"
         >
           <FaFacebook className="w-6 h-6 hover:text-blue-600 transition-colors" />
         </a>
         <a
-          href="https://instagram.com/uomcomputerclub"
+          href="https://www.instagram.com/uom.computerclub/"
           target="_blank"
           rel="noopener noreferrer"
         >
           <FaInstagram className="w-6 h-6 hover:text-pink-500 transition-colors" />
         </a>
         <a
-          href="https://linkedin.com/company/uomcomputerclub"
+          href="https://www.linkedin.com/company/uom-computer-club/posts/?feedView=all"
           target="_blank"
           rel="noopener noreferrer"
         >
           <FaLinkedin className="w-6 h-6 hover:text-blue-700 transition-colors" />
-        </a>
-        <a
-          href="https://discord.gg/YOUR_INVITE_LINK"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <FaDiscord className="w-6 h-6 hover:text-indigo-500 transition-colors" />
         </a>
       </div>
     </div>
