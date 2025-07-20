@@ -1,16 +1,22 @@
 import Image from "next/image";
 import { NeonGradientCard } from "./magicui/neon-gradient-card";
 
-
 type PartnerCardProps = {
   logoSrc: string;
   altText: string;
   neonColors: { firstColor: string; secondColor: string };
 };
 
-export function PartnerCard({ logoSrc, altText, neonColors }: PartnerCardProps) {
+export function PartnerCard({
+  logoSrc,
+  altText,
+  neonColors,
+}: PartnerCardProps) {
   return (
-    <NeonGradientCard neonColors={neonColors} className="flex items-center justify-center">
+    <NeonGradientCard
+      neonColors={neonColors}
+      className="flex items-center justify-center"
+    >
       <div className="flex items-center justify-center w-full h-40 bg-white rounded-2xl">
         <Image
           src={logoSrc}
@@ -28,9 +34,9 @@ export function PartnerCard({ logoSrc, altText, neonColors }: PartnerCardProps) 
 
 export function OurPartnersSection() {
   const neonColorsList = [
-    { firstColor: "#ff2d55", secondColor: "#00bfff" }, // reddish-pink + blue
-    { firstColor: "#ff2d55", secondColor: "#00ff99" }, // reddish-pink + green
-    { firstColor: "#ff2d55", secondColor: "#cc66ff" }, // reddish-pink + purple
+    { firstColor: "#ff2d55", secondColor: "#00bfff" },
+    { firstColor: "#ff4d4d", secondColor: "#ff4d4d" },
+    { firstColor: "#ff2d55", secondColor: "#cc66ff" },
   ];
 
   return (

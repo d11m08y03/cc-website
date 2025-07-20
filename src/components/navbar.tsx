@@ -71,9 +71,6 @@ export function Navbar() {
           <span className="text-lg font-semibold">Computer Club</span>
         </Link>
         <div className="hidden md:flex space-x-2">
-          <Button variant="ghost" asChild>
-            <Link href="/">Home</Link>
-          </Button>
           {hasRegisteredTeam && (
             <Button variant="ghost" asChild>
               <Link href="/dashboard">My Team</Link>

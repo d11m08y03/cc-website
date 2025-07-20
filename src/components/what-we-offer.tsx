@@ -5,19 +5,21 @@ type OffersCardProps = {
   icon: LucideIcon;
   title: string;
   description: string;
-  iconColor: "blue" | "green" | "purple";
+  iconColor: "blue" | "green" | "purple" | "red";
 };
 
 const tailwindColorClassMap: Record<OffersCardProps["iconColor"], string> = {
   blue: "text-blue-500",
   green: "text-green-500",
   purple: "text-purple-500",
+  red: "text-red-500",
 };
 
 const neonColorMap: Record<OffersCardProps["iconColor"], string> = {
   blue: "#00bfff",
   green: "#00ff99",
   purple: "#cc66ff",
+  red: "#ff4d4d", // <- This matches your secondColor
 };
 
 // Constant reddish-pink neon base
@@ -73,7 +75,7 @@ export function WhatWeOfferSection() {
           icon={Calendar}
           title="Hackathons"
           description="Collaborative coding events to solve real-world problems."
-          iconColor="green"
+          iconColor="red"
         />
 
         <OfferCard
