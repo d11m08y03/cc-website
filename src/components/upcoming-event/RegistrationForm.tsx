@@ -256,17 +256,26 @@ const MemberForm = ({
   );
 };
 
-const Step3 = ({ prevStep, nextStep, setProjectFile }: any) => {
+const Step3 = ({ prevStep, nextStep, setProjectFile, setProjectFileName }: any) => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files ? e.target.files[0] : null;
     if (file) {
+      if (file.type !== "application/pdf") {
+        toast.error("Only PDF files are allowed.");
+        setProjectFile(null);
+        setProjectFileName(null);
+        e.target.value = ""; // Clear the input
+        return;
+      }
       const reader = new FileReader();
       reader.onloadend = () => {
         setProjectFile(reader.result); // Store Base64 string
+        setProjectFileName(file.name); // Store file name
       };
       reader.readAsDataURL(file);
     } else {
       setProjectFile(null);
+      setProjectFileName(null);
     }
   };
 
@@ -360,6 +369,7 @@ export function RegistrationForm() {
   const [members, setMembers] = useState<any[]>([]);
   const [currentMember, setCurrentMember] = useState(0);
   const [projectFile, setProjectFile] = useState<string | null>(null);
+  const [projectFileName, setProjectFileName] = useState<string | null>(null);
   const [errors, setErrors] = useState<any>({});
   const { data: session, status } = useSession();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -419,10 +429,13 @@ export function RegistrationForm() {
     if (!validateStep()) return;
 
     const teamData = {
-      teamName,
+      teamDetails: {
+        teamName,
+        projectFile: projectFile,
+        projectFileName: projectFileName,
+        userId: session?.user?.id, // Include userId from session
+      },
       members,
-      projectFile: projectFile,
-      userId: session?.user?.id, // Include userId from session
     };
 
     try {
@@ -478,6 +491,7 @@ export function RegistrationForm() {
             nextStep={nextStep}
             prevStep={prevStep}
             setProjectFile={setProjectFile}
+            setProjectFileName={setProjectFileName}
           />
         );
       case 4:
@@ -488,6 +502,7 @@ export function RegistrationForm() {
               teamName,
               members,
               projectFile: projectFile ? "File uploaded (Base64)" : null,
+            projectFileName: projectFileName,
             }}
             handleSubmit={handleSubmit}
           />

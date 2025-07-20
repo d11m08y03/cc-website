@@ -18,40 +18,68 @@ const memberSchema = z.object({
 
 const teamDetailsSchema = z.object({
   teamName: z.string().min(1, "Team name is required"),
-  members: z.array(memberSchema).min(3).max(5),
   projectFile: z.string().nullable(),
+  projectFileName: z.string().nullable(),
   userId: z.string().min(1, "User ID is required"), // Added userId to schema
 });
+
+const teamSubmissionSchema = z.object({
+  teamDetails: teamDetailsSchema,
+  members: z.array(memberSchema).min(3).max(5),
+});
+
+import { teamMembers } from "@/db/postgres/schema";
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const validatedData = teamDetailsSchema.parse(body);
+    const validatedData = teamSubmissionSchema.parse(body);
 
-    await db.insert(teamDetails)
+    const [newTeam] = await db.insert(teamDetails)
       .values({
-        userId: validatedData.userId, // Use userId from validatedData
-        teamName: validatedData.teamName,
-        members: validatedData.members,
-        projectFile: validatedData.projectFile,
+        userId: validatedData.teamDetails.userId,
+        teamName: validatedData.teamDetails.teamName,
+        projectFile: validatedData.teamDetails.projectFile,
+        projectFileName: validatedData.teamDetails.projectFileName,
       })
       .onConflictDoUpdate({
         target: teamDetails.userId,
         set: {
-          teamName: validatedData.teamName,
-          members: validatedData.members,
-          projectFile: validatedData.projectFile,
+          teamName: validatedData.teamDetails.teamName,
+          projectFile: validatedData.teamDetails.projectFile,
+          projectFileName: validatedData.teamDetails.projectFileName,
         },
-      });
+      })
+      .returning({ id: teamDetails.id });
+
+    if (!newTeam) {
+      throw new Error("Failed to create or update team details.");
+    }
+
+    const teamId = newTeam.id;
+
+    const membersToInsert = validatedData.members.map((member, index) => ({
+      teamId: teamId,
+      userId: index === 0 ? validatedData.teamDetails.userId : undefined, // Assign userId only to the leader
+      role: index === 0 ? "leader" : "member", // Assign role based on index
+      fullName: member.fullName,
+      email: member.email,
+      contactNumber: member.contactNumber,
+      foodPreference: member.foodPreference,
+      tshirtSize: member.tshirtSize,
+      allergies: member.allergies,
+    }));
+
+    await db.insert(teamMembers).values(membersToInsert).onConflictDoNothing();
 
     return NextResponse.json(
-      { message: "Team details saved successfully" },
+      { message: "Team details and members saved successfully" },
       { status: 200 },
     );
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { message: "Validation Error"},
+        { message: "Validation Error", errors: error.errors },
         { status: 400 },
       );
     }

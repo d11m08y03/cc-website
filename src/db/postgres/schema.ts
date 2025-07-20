@@ -192,8 +192,8 @@ export const teamDetails = pgTable(
       .notNull()
       .$defaultFn(() => sql`gen_random_uuid()`), // Use gen_random_uuid() for PostgreSQL
     teamName: text("team_name").notNull(),
-    members: jsonb("members").notNull(), // Use jsonb for PostgreSQL
     projectFile: text("project_file"),
+    projectFileName: text("project_file_name"),
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
@@ -204,6 +204,25 @@ export const teamDetails = pgTable(
     };
   },
 );
+
+export const teamMembers = pgTable("team_members", {
+  id: text("id")
+    .primaryKey()
+    .notNull()
+    .$defaultFn(() => sql`gen_random_uuid()`),
+  teamId: text("team_id")
+    .notNull()
+    .references(() => teamDetails.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .references(() => users.id, { onDelete: "cascade" }),
+  role: text("role"), // e.g., "leader", "member"
+  fullName: text("full_name").notNull(),
+  email: text("email").notNull(),
+  contactNumber: text("contact_number").notNull(),
+  foodPreference: text("food_preference").notNull(),
+  tshirtSize: text("tshirt_size").notNull(),
+  allergies: text("allergies"),
+});
 
 
 export const eventPhotoRelations = relations(eventPhotos, ({ one }) => ({
@@ -254,9 +273,21 @@ export const userRelations = relations(users, ({ many }) => ({
   teamDetails: many(teamDetails),
 }));
 
-export const teamDetailsRelations = relations(teamDetails, ({ one }) => ({
+export const teamDetailsRelations = relations(teamDetails, ({ one, many }) => ({
   user: one(users, {
     fields: [teamDetails.userId],
+    references: [users.id],
+  }),
+  teamMembers: many(teamMembers),
+}));
+
+export const teamMembersRelations = relations(teamMembers, ({ one }) => ({
+  teamDetails: one(teamDetails, {
+    fields: [teamMembers.teamId],
+    references: [teamDetails.id],
+  }),
+  user: one(users, {
+    fields: [teamMembers.userId],
     references: [users.id],
   }),
 }));

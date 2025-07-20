@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -17,6 +18,31 @@ import { ThemeToggle } from "./theme-toggle";
 
 export function Navbar() {
   const { data: session, status } = useSession();
+  const [hasRegisteredTeam, setHasRegisteredTeam] = useState(false);
+
+  useEffect(() => {
+    const checkRegistrationStatus = async () => {
+      if (status === "authenticated") {
+        try {
+          const response = await fetch("/api/registration-status");
+          if (response.ok) {
+            const data = await response.json();
+            setHasRegisteredTeam(data.isRegistered);
+          } else {
+            console.error("Failed to fetch registration status");
+            setHasRegisteredTeam(false);
+          }
+        } catch (error) {
+          console.error("Error fetching registration status:", error);
+          setHasRegisteredTeam(false);
+        }
+      } else {
+        setHasRegisteredTeam(false);
+      }
+    };
+
+    checkRegistrationStatus();
+  }, [session, status]);
 
   const handleSignIn = async () => {
     try {
@@ -48,6 +74,11 @@ export function Navbar() {
           <Button variant="ghost" asChild>
             <Link href="/">Home</Link>
           </Button>
+          {hasRegisteredTeam && (
+            <Button variant="ghost" asChild>
+              <Link href="/dashboard">My Team</Link>
+            </Button>
+          )}
         </div>
       </div>
 
