@@ -197,6 +197,7 @@ export const teamDetails = pgTable(
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
+    approvalStatus: text("approval_status").notNull().default("pending"),
   },
   (table) => {
     return {
