@@ -52,7 +52,7 @@ function OfferCard({
 
 export function WhatWeOfferSection() {
   return (
-    <div className="px-4 sm:px-6 lg:px-8">
+    <div>
       <div className="mb-10 text-center">
         <h2 className="text-2xl sm:text-3xl font-bold">What We Offer</h2>
         <p className="mt-2 dark:text-gray-300 text-gray-600 max-w-xl mx-auto text-lg">

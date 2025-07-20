@@ -34,7 +34,7 @@ export function OurPartnersSection() {
   ];
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8">
+    <div>
       <div className="mb-10 text-center">
         <h2 className="text-2xl sm:text-3xl font-bold">Our Partners</h2>
         <p className="mt-2 max-w-xl mx-auto text-lg">

@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 "use client";
 
 import { useState } from "react";
@@ -519,9 +517,9 @@ export function RegistrationForm() {
   return (
     <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <NeonGradientCard>
-          <Button disabled={status === "loading"}>Register Now</Button>
-        </NeonGradientCard>
+        <Button className="w-full" disabled={status === "loading"}>
+          Register Now
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px] p-0">
         <NeonGradientCard>

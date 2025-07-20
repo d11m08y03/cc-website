@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
@@ -12,9 +12,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { MenuIcon } from "lucide-react";
-
 import { toast } from "sonner";
 import { ThemeToggle } from "./theme-toggle";
 
@@ -54,7 +51,7 @@ export function Navbar() {
         </div>
       </div>
 
-      <div className="hidden md:flex items-center space-x-4">
+      <div className="flex items-center space-x-2 sm:space-x-4">
         <ThemeToggle />
         {status === "authenticated" ? (
           <DropdownMenu>
@@ -65,7 +62,9 @@ export function Navbar() {
                     src={session.user?.image || ""}
                     alt={session.user?.name || "User Avatar"}
                   />
-                  <AvatarFallback>{session.user?.name?.[0] || "CN"}</AvatarFallback>
+                  <AvatarFallback>
+                    {session.user?.name?.[0] || "CN"}
+                  </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
@@ -93,24 +92,6 @@ export function Navbar() {
         ) : (
           <Button onClick={handleSignIn}>Log In</Button>
         )}
-      </div>
-
-      {/* Mobile Navigation */}
-      <div className="md:hidden">
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <MenuIcon className="h-6 w-6" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="right">
-            <div className="flex flex-col space-y-4 pt-8">
-              <Button variant="ghost" asChild>
-                <Link href="/">Home</Link>
-              </Button>
-            </div>
-          </SheetContent>
-        </Sheet>
       </div>
     </nav>
   );
