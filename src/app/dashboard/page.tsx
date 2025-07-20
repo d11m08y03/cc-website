@@ -6,7 +6,8 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { User, Users, FileText, Loader2, XCircle } from "lucide-react";
+import { User, Users, FileText, Loader2, XCircle, Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface TeamMember {
   id: string;
@@ -171,7 +172,23 @@ export default function DashboardPage() {
               <>
                 <p><strong>Status:</strong> Submitted</p>
                 <p><strong>File Name:</strong> {teamData.projectFileName}</p>
-                {/* You might add a download link here if projectFile is a URL or can be converted */}
+                <Button
+                  onClick={() => {
+                    if (teamData.projectFile && teamData.projectFileName) {
+                      const link = document.createElement('a');
+                      link.href = teamData.projectFile;
+                      link.download = teamData.projectFileName;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    } else {
+                      toast.error("Project file not available for download.");
+                    }
+                  }}
+                  className="mt-4"
+                >
+                  <Download className="h-4 w-4 mr-2" /> Download File
+                </Button>
               </>
             ) : (
               <p><strong>Status:</strong> Not yet submitted</p>
