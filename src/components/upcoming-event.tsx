@@ -69,7 +69,7 @@ export function UpcomingEventsSection() {
 						/>
 					</div>
 
-					<div className="w-full md:w-1/2 px-2 py-2 md:px-5 md:py-8 flex flex-col justify-between">
+					<div className="w-full md:w-1/2 px-6 flex flex-col justify-between">
 						<div>
 							{/* Beautiful Countdown Timer (md and up only) */}
 							<div className="hidden md:flex flex-col items-center mb-6">
