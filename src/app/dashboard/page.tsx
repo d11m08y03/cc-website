@@ -21,11 +21,13 @@ import {
   Shirt,
   Pencil,
   UserPlus,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RegistrationForm } from "@/components/upcoming-event/RegistrationForm";
 import { AddTeamMemberForm } from "@/components/add-team-member-form";
 import { ChangeProposalForm } from "@/components/change-proposal-form";
+import { EditTeamMemberForm } from "@/components/edit-team-member-form";
 
 interface TeamMember {
   id: string;
@@ -56,6 +58,29 @@ export default function DashboardPage() {
   const [teamData, setTeamData] = useState<TeamDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const handleDeleteMember = async (memberId: string) => {
+    if (!window.confirm("Are you sure you want to delete this team member?")) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/team-members/${memberId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        toast.success("Team member deleted successfully!");
+        fetchTeamDetails(); // Refresh the team data
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message || "Failed to delete team member.");
+      }
+    } catch (error) {
+      console.error("Error deleting team member:", error);
+      toast.error("An unexpected error occurred while deleting the member.");
+    }
+  };
 
   const fetchTeamDetails = async () => {
     try {
@@ -188,17 +213,30 @@ export default function DashboardPage() {
         {teamLeader && (
           <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0">
-              <CardTitle className="text-2xl font-bold">Team Leader</CardTitle>
-              <User className="h-8 w-8 text-primary" />
+              <div className="flex items-center gap-2">
+                <User className="h-8 w-8 text-primary" />
+                <CardTitle className="text-2xl font-bold">
+                  Team Leader
+                </CardTitle>
+              </div>
+              <div className="flex gap-2">
+                <EditTeamMemberForm
+                  memberData={teamLeader}
+                  onMemberUpdated={fetchTeamDetails}
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleDeleteMember(teamLeader.id)}
+                  disabled
+                >
+                  <Trash2 className="h-4 w-4 text-red-500" />
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="pt-4 space-y-2">
               <p className="flex items-center gap-2">
-                <User className="h-4 w-4 text-primary" />
                 <strong>Name:</strong> {teamLeader.fullName}
-              </p>
-              <p className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-blue-500" />{" "}
-                <strong>Email:</strong> {teamLeader.email}
               </p>
               <p className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-green-500" />{" "}
@@ -230,19 +268,29 @@ export default function DashboardPage() {
               className="shadow-lg hover:shadow-xl transition-shadow duration-300"
             >
               <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                <CardTitle className="text-2xl font-bold">
-                  Member {index + 1}
-                </CardTitle>
-                <User className="h-8 w-8 text-primary" />
+                <div className="flex items-center gap-2">
+                  <User className="h-8 w-8 text-primary" />
+                  <CardTitle className="text-2xl font-bold">
+                    Member {index + 1}
+                  </CardTitle>
+                </div>
+                <div className="flex gap-2">
+                  <EditTeamMemberForm
+                    memberData={member}
+                    onMemberUpdated={fetchTeamDetails}
+                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleDeleteMember(member.id)}
+                  >
+                    <Trash2 className="h-4 w-4 text-red-500" />
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent className="pt-4 space-y-2">
                 <p className="flex items-center gap-2">
-                  <User className="h-4 w-4 text-primary" />
                   <strong>Name:</strong> {member.fullName}
-                </p>
-                <p className="flex items-center gap-2">
-                  <Mail className="h-4 w-4 text-blue-500" />{" "}
-                  <strong>Email:</strong> {member.email}
                 </p>
                 <p className="flex items-center gap-2">
                   <Phone className="h-4 w-4 text-green-500" />{" "}
