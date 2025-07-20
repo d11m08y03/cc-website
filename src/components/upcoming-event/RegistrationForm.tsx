@@ -532,7 +532,7 @@ export function RegistrationForm() {
   return (
     <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button className="w-full" disabled={status === "loading"}>
+        <Button className="w-full cursor-pointer" disabled={status === "loading"}>
           Register Now
         </Button>
       </DialogTrigger>
