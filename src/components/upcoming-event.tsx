@@ -228,17 +228,17 @@ export function UpcomingEventsSection() {
               <div
                 key={sponsor.logo}
                 className={cn(
-                  "bg-white rounded-lg p-2 shadow flex items-center justify-center w-40",
+                  "bg-white rounded-lg p-2 border border-red-500 shadow flex items-center justify-center w-40",
                   index !== 4 && "mr-4",
                 )}
               >
-                        <Image
-                          src={sponsor.logo}
-                          alt={sponsor.alt}
-                          width={120}
-                          height={60}
-                          className="w-[120px] h-[60px] object-contain"
-                        />
+                <Image
+                  src={sponsor.logo}
+                  alt={sponsor.alt}
+                  width={120}
+                  height={60}
+                  className="w-[120px] h-[60px] object-contain"
+                />
               </div>
             ))}
           </div>
