@@ -59,11 +59,11 @@ const Step1 = ({
   errors,
 }: any) => (
   <div>
-    <div className="flex items-center gap-2 mb-4">
-      <Users className="w-6 h-6" />
+    <div className="flex items-center gap-2 mb-4 font-semibold text-lg">
+		Team Details
     </div>
     <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-4">
-      <Label htmlFor="team-name" className="text-left w-full">
+      <Label htmlFor="team-name" className="h-full flex items-center justify-start sm:justify-end">
         Team Name
       </Label>
       <div className="sm:col-span-3">
@@ -80,8 +80,8 @@ const Step1 = ({
       </div>
     </div>
     <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-4 mt-4">
-      <Label htmlFor="num-people" className="text-left w-full sm:text-right">
-        Number of People
+      <Label htmlFor="num-people" className="h-full flex items-center justify-start sm:justify-end">
+        Members
       </Label>
       <Select
         onValueChange={(value) => setNumPeople(parseInt(value, 10))}
@@ -91,7 +91,6 @@ const Step1 = ({
           <SelectValue placeholder="Select number of people" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="1">1</SelectItem>
           <SelectItem value="3">3</SelectItem>
           <SelectItem value="4">4</SelectItem>
           <SelectItem value="5">5</SelectItem>
