@@ -59,13 +59,12 @@ const Step1 = ({
   <div>
     <div className="flex items-center gap-2 mb-4">
       <Users className="w-6 h-6" />
-      <h3 className="text-lg font-semibold">Team Details</h3>
     </div>
-    <div className="grid grid-cols-4 items-center gap-4">
-      <Label htmlFor="team-name" className="text-right">
+    <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-4">
+      <Label htmlFor="team-name" className="text-left w-full">
         Team Name
       </Label>
-      <div className="col-span-3">
+      <div className="sm:col-span-3">
         <Input
           id="team-name"
           value={teamName}
@@ -78,15 +77,15 @@ const Step1 = ({
         )}
       </div>
     </div>
-    <div className="grid grid-cols-4 items-center gap-4 mt-4">
-      <Label htmlFor="num-people" className="text-right">
+    <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-4 mt-4">
+      <Label htmlFor="num-people" className="text-left w-full sm:text-right">
         Number of People
       </Label>
       <Select
         onValueChange={(value) => setNumPeople(parseInt(value, 10))}
         defaultValue={numPeople.toString()}
       >
-        <SelectTrigger className="col-span-3">
+        <SelectTrigger className="sm:col-span-3">
           <SelectValue placeholder="Select number of people" />
         </SelectTrigger>
         <SelectContent>
@@ -121,19 +120,18 @@ const MemberForm = ({
   return (
     <div>
       <div className="flex items-center gap-2 mb-4">
-        <User className="w-6 h-6" />
         <h3 className="text-lg font-semibold">
           {memberIndex === 0
             ? "Team Leader Information"
-            : `Member ${memberIndex + 1} of ${numPeople}`}
+            : ""}
         </h3>
       </div>
       <div className="grid grid-cols-1 gap-4">
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor={`name-${memberIndex}`} className="text-right">
+        <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-4">
+          <Label htmlFor={`name-${memberIndex}`} className="h-full flex items-center justify-start sm:justify-end">
             Full Name
           </Label>
-          <div className="col-span-3">
+          <div className="sm:col-span-3">
             <Input
               id={`name-${memberIndex}`}
               value={memberData.fullName || ""}
@@ -146,11 +144,11 @@ const MemberForm = ({
             )}
           </div>
         </div>
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor={`email-${memberIndex}`} className="text-right">
+        <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-4">
+          <Label htmlFor={`email-${memberIndex}`} className="h-full flex items-center justify-start sm:justify-end">
             Email
           </Label>
-          <div className="col-span-3">
+          <div className="sm:col-span-3">
             <Input
               id={`email-${memberIndex}`}
               type="email"
@@ -164,11 +162,11 @@ const MemberForm = ({
             )}
           </div>
         </div>
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor={`contact-${memberIndex}`} className="text-right">
+        <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-4">
+          <Label htmlFor={`contact-${memberIndex}`} className="h-full flex items-center justify-start sm:justify-end">
             Contact Number
           </Label>
-          <div className="col-span-3">
+          <div className="sm:col-span-3">
             <Input
               id={`contact-${memberIndex}`}
               value={memberData.contactNumber || ""}
@@ -181,11 +179,11 @@ const MemberForm = ({
             )}
           </div>
         </div>
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor={`food-${memberIndex}`} className="text-right">
+        <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-4">
+          <Label htmlFor={`food-${memberIndex}`} className="h-full flex items-center justify-start sm:justify-end">
             Food Preference
           </Label>
-          <div className="col-span-3">
+          <div className="sm:col-span-3">
             <Select
               value={memberData.foodPreference || ""}
               onValueChange={(value) => handleChange("foodPreference", value)}
@@ -205,8 +203,8 @@ const MemberForm = ({
             )}
           </div>
         </div>
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor={`allergies-${memberIndex}`} className="text-right">
+        <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-4">
+          <Label htmlFor={`allergies-${memberIndex}`} className="h-full flex items-center justify-start sm:justify-end">
             Allergies
           </Label>
           <Input
@@ -214,14 +212,14 @@ const MemberForm = ({
             placeholder="if any"
             value={memberData.allergies || ""}
             onChange={(e) => handleChange("allergies", e.target.value)}
-            className="col-span-3"
+            className="sm:col-span-3"
           />
         </div>
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor={`tshirt-${memberIndex}`} className="text-right">
+        <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-4">
+          <Label htmlFor={`tshirt-${memberIndex}`} className="h-full flex items-center justify-start sm:justify-end">
             T-Shirt Size
           </Label>
-          <div className="col-span-3">
+          <div className="sm:col-span-3">
             <Select
               value={memberData.tshirtSize || ""}
               onValueChange={(value) => handleChange("tshirtSize", value)}
@@ -259,16 +257,19 @@ const MemberForm = ({
 };
 
 const Step3 = ({ prevStep, nextStep, setProjectFile, setProjectFileName }: any) => {
+  const [fileError, setFileError] = useState<string | null>(null);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files ? e.target.files[0] : null;
     if (file) {
       if (file.type !== "application/pdf") {
-        toast.error("Only PDF files are allowed.");
+        setFileError("Only PDF files are allowed.");
         setProjectFile(null);
         setProjectFileName(null);
         e.target.value = ""; // Clear the input
         return;
       }
+      setFileError(null); // Clear error if file is valid
       const reader = new FileReader();
       reader.onloadend = () => {
         setProjectFile(reader.result); // Store Base64 string
@@ -278,6 +279,7 @@ const Step3 = ({ prevStep, nextStep, setProjectFile, setProjectFileName }: any) 
     } else {
       setProjectFile(null);
       setProjectFileName(null);
+      setFileError(null); // Clear error if no file is selected
     }
   };
 
@@ -285,19 +287,25 @@ const Step3 = ({ prevStep, nextStep, setProjectFile, setProjectFileName }: any) 
     <div>
       <div className="flex items-center gap-2 mb-4">
         <FileText className="w-6 h-6" />
-        <h3 className="text-lg font-semibold">Project Submission</h3>
       </div>
       <div className="grid grid-cols-1 gap-4 border-t pt-4 mt-4">
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="project-file" className="text-right">
+        <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-4">
+          <Label htmlFor="project-file" className="h-full flex items-center justify-start sm:justify-end">
             <Upload className="w-4 h-4 mr-2 inline" /> Upload
           </Label>
-          <Input
-            id="project-file"
-            type="file"
-            onChange={handleFileChange}
-            className="col-span-3"
-          />
+          <div className="sm:col-span-3">
+            <Input
+              id="project-file"
+              type="file"
+              onChange={handleFileChange}
+              className="sm:col-span-3"
+            />
+            {fileError && (
+              <p className="text-red-500 text-xs mt-1">
+                {fileError}
+              </p>
+            )}
+          </div>
         </div>
       </div>
       <div className="flex justify-between mt-4">
@@ -571,13 +579,12 @@ export function RegistrationForm() {
         <DialogContent className="sm:max-w-[600px] p-0">
           <NeonGradientCard neonColors={neonColor}>
             <div className="p-4">
-              <DialogHeader>
-                <DialogTitle>
-                  Event Registration -{" "}
+              <DialogHeader className="flex flex-row justify-between items-center w-full">
+                <span className="text-lg font-semibold">
                   {step === 2
                     ? `Member ${currentMember + 1} of ${numPeople}`
                     : `Step ${step} of 4`}
-                </DialogTitle>
+                </span>
               </DialogHeader>
               {renderStep()}
             </div>
