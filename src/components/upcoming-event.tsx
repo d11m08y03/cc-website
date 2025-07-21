@@ -25,6 +25,7 @@ export function UpcomingEventsSection() {
     { logo: "/Sponsors/accenture_marketing_logo.png", alt: "Accenture" },
     { logo: "/Sponsors/Emtel_Logo.png", alt: "Emtel" },
     { logo: "/Sponsors/mu-swan-logo.webp", alt: "MU Swan" },
+    { logo: "/Sponsors/iteligence_logo.png", alt: "MU Swan" },
   ];
 
   // Countdown timer logic
@@ -156,8 +157,8 @@ export function UpcomingEventsSection() {
                       <div
                         key={sponsor.logo}
                         className={cn(
-                          "bg-white rounded-lg p-2 shadow flex items-center justify-center w-40",
-                          index !== 3 && "mr-4",
+                          "bg-white rounded-lg p-2 border border-red-500 shadow flex items-center justify-center w-40",
+                          index !== 4 && "mr-4",
                         )}
                       >
                         <Image
@@ -165,7 +166,7 @@ export function UpcomingEventsSection() {
                           alt={sponsor.alt}
                           width={120}
                           height={60}
-                          className="object-contain h-12 w-auto"
+                          className="w-[120px] h-[60px] object-contain"
                         />
                       </div>
                     ))}
@@ -223,23 +224,23 @@ export function UpcomingEventsSection() {
         </div>
         <Marquee>
           <div className="flex items-center">
-                    {sponsors.map((sponsor, index) => (
-                      <div
-                        key={sponsor.logo}
-                        className={cn(
-                          "bg-white rounded-lg p-2 shadow flex items-center justify-center w-40",
-                          index !== 3 && "mr-4",
-                        )}
-                      >
+            {sponsors.map((sponsor, index) => (
+              <div
+                key={sponsor.logo}
+                className={cn(
+                  "bg-white rounded-lg p-2 shadow flex items-center justify-center w-40",
+                  index !== 4 && "mr-4",
+                )}
+              >
                         <Image
                           src={sponsor.logo}
                           alt={sponsor.alt}
                           width={120}
                           height={60}
-                          className="object-contain h-12 w-auto"
+                          className="w-[120px] h-[60px] object-contain"
                         />
-                      </div>
-                    ))}
+              </div>
+            ))}
           </div>
         </Marquee>
       </div>
