@@ -1,7 +1,8 @@
 'use client'
 import Image from "next/image";
 import { NeonGradientCard } from "./magicui/neon-gradient-card";
-import { RegistrationForm } from "./upcoming-event/RegistrationForm";
+import dynamic from 'next/dynamic';
+const RegistrationForm = dynamic(() => import('./upcoming-event/RegistrationForm').then(mod => mod.RegistrationForm), { ssr: false });
 import { Calendar, MapPin, Clock, Info } from "lucide-react";
 import { Marquee } from "./magicui/marquee";
 import { useEffect, useState } from "react";

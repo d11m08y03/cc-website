@@ -36,6 +36,7 @@ import { z } from "zod";
 import { signIn, useSession } from "next-auth/react";
 import { toast } from "sonner";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const memberSchema = z.object({
   fullName: z.string().min(1, "This field cannot be blank"),
@@ -122,14 +123,15 @@ const MemberForm = ({
     <div>
       <div className="flex items-center gap-2 mb-4">
         <h3 className="text-lg font-semibold">
-          {memberIndex === 0
-            ? "Team Leader Information"
-            : ""}
+          {memberIndex === 0 ? "Team Leader Information" : ""}
         </h3>
       </div>
       <div className="grid grid-cols-1 gap-4">
         <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-4">
-          <Label htmlFor={`name-${memberIndex}`} className="h-full flex items-center justify-start sm:justify-end">
+          <Label
+            htmlFor={`name-${memberIndex}`}
+            className="h-full flex items-center justify-start sm:justify-end"
+          >
             Full Name
           </Label>
           <div className="sm:col-span-3">
@@ -146,7 +148,10 @@ const MemberForm = ({
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-4">
-          <Label htmlFor={`email-${memberIndex}`} className="h-full flex items-center justify-start sm:justify-end">
+          <Label
+            htmlFor={`email-${memberIndex}`}
+            className="h-full flex items-center justify-start sm:justify-end"
+          >
             Email
           </Label>
           <div className="sm:col-span-3">
@@ -164,7 +169,10 @@ const MemberForm = ({
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-4">
-          <Label htmlFor={`contact-${memberIndex}`} className="h-full flex items-center justify-start sm:justify-end">
+          <Label
+            htmlFor={`contact-${memberIndex}`}
+            className="h-full flex items-center justify-start sm:justify-end"
+          >
             Contact Number
           </Label>
           <div className="sm:col-span-3">
@@ -181,7 +189,10 @@ const MemberForm = ({
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-4">
-          <Label htmlFor={`food-${memberIndex}`} className="h-full flex items-center justify-start sm:justify-end">
+          <Label
+            htmlFor={`food-${memberIndex}`}
+            className="h-full flex items-center justify-start sm:justify-end"
+          >
             Food Preference
           </Label>
           <div className="sm:col-span-3">
@@ -205,7 +216,10 @@ const MemberForm = ({
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-4">
-          <Label htmlFor={`allergies-${memberIndex}`} className="h-full flex items-center justify-start sm:justify-end">
+          <Label
+            htmlFor={`allergies-${memberIndex}`}
+            className="h-full flex items-center justify-start sm:justify-end"
+          >
             Allergies
           </Label>
           <Input
@@ -217,7 +231,10 @@ const MemberForm = ({
           />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-4">
-          <Label htmlFor={`tshirt-${memberIndex}`} className="h-full flex items-center justify-start sm:justify-end">
+          <Label
+            htmlFor={`tshirt-${memberIndex}`}
+            className="h-full flex items-center justify-start sm:justify-end"
+          >
             T-Shirt Size
           </Label>
           <div className="sm:col-span-3">
@@ -247,7 +264,7 @@ const MemberForm = ({
       </div>
       <div className="flex justify-between mt-4">
         <Button onClick={prevStep}>
-          <ArrowLeft className="w-4 h-4" /> 
+          <ArrowLeft className="w-4 h-4" />
         </Button>
         <Button onClick={nextStep}>
           <ArrowRight className="w-4 h-4" />
@@ -257,7 +274,12 @@ const MemberForm = ({
   );
 };
 
-const Step3 = ({ prevStep, nextStep, setProjectFile, setProjectFileName }: any) => {
+const Step3 = ({
+  prevStep,
+  nextStep,
+  setProjectFile,
+  setProjectFileName,
+}: any) => {
   const [fileError, setFileError] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -291,7 +313,10 @@ const Step3 = ({ prevStep, nextStep, setProjectFile, setProjectFileName }: any) 
       </div>
       <div className="grid grid-cols-1 gap-4 border-t pt-4 mt-4">
         <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-4">
-          <Label htmlFor="project-file" className="h-full flex items-center justify-start sm:justify-end">
+          <Label
+            htmlFor="project-file"
+            className="h-full flex items-center justify-start sm:justify-end"
+          >
             <Upload className="w-4 h-4 mr-2 inline" /> Upload
           </Label>
           <div className="sm:col-span-3">
@@ -302,9 +327,7 @@ const Step3 = ({ prevStep, nextStep, setProjectFile, setProjectFileName }: any) 
               className="sm:col-span-3"
             />
             {fileError && (
-              <p className="text-red-500 text-xs mt-1">
-                {fileError}
-              </p>
+              <p className="text-red-500 text-xs mt-1">{fileError}</p>
             )}
           </div>
         </div>
@@ -326,7 +349,8 @@ const Step4 = ({ prevStep, handleSubmit, isLoading }: any) => (
     <CheckCircle className="w-16 h-16 text-green-500 mb-4" />
     <h2 className="text-2xl font-semibold mb-2">Confirm Your Registration</h2>
     <p className="text-lg mb-4">
-      Please confirm your registration. You will be able to edit your information at any time after registration.
+      Please confirm your registration. You will be able to edit your
+      information at any time after registration.
     </p>
     <div className="p-4 border-t flex justify-between w-full mt-auto">
       <Button onClick={prevStep} disabled={isLoading}>
@@ -449,6 +473,8 @@ export function RegistrationForm() {
     }
   };
 
+	const router = useRouter();
+
   const handleSubmit = async () => {
     if (!validateStep()) return;
 
@@ -472,12 +498,13 @@ export function RegistrationForm() {
         body: JSON.stringify(teamData),
       });
 
-			console.log(teamData);
-			
+      console.log(teamData);
 
       if (response.ok) {
         toast.success("Registration submitted successfully!");
         setIsDialogOpen(false); // Close the dialog on success
+
+        router.push("/dashboard"); // Redirect to dashboard
       } else {
         const errorData = await response.json();
         toast.error(errorData.message || "Failed to submit registration.");
@@ -532,7 +559,7 @@ export function RegistrationForm() {
               teamName,
               members,
               projectFile: projectFile ? "File uploaded (Base64)" : null,
-            projectFileName: projectFileName,
+              projectFileName: projectFileName,
             }}
             handleSubmit={handleSubmit}
             isLoading={isLoading}
@@ -592,7 +619,10 @@ export function RegistrationForm() {
               <Link href="/dashboard">Go to Dashboard</Link>
             </Button>
           ) : (
-            <Button className="w-full cursor-pointer" disabled={status === "loading"}>
+            <Button
+              className="w-full cursor-pointer"
+              disabled={status === "loading"}
+            >
               Register Now
             </Button>
           )}
@@ -601,7 +631,9 @@ export function RegistrationForm() {
           <NeonGradientCard neonColors={neonColor}>
             <div className="p-4">
               <DialogHeader className="flex flex-row justify-between items-center w-full">
-                <DialogTitle className="sr-only">Event Registration Form</DialogTitle>
+                <DialogTitle className="sr-only">
+                  Event Registration Form
+                </DialogTitle>
                 <span className="text-lg font-semibold">
                   {step === 2
                     ? `Member ${currentMember + 1} of ${numPeople}`
