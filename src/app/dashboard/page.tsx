@@ -23,6 +23,15 @@ import {
   UserPlus,
   Trash2,
 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { RegistrationForm } from "@/components/upcoming-event/RegistrationForm";
 import { AddTeamMemberForm } from "@/components/add-team-member-form";
@@ -58,20 +67,51 @@ export default function DashboardPage() {
   const [teamData, setTeamData] = useState<TeamDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const [memberToDelete, setMemberToDelete] = useState<TeamMember | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isMinMembersDialogOpen, setIsMinMembersDialogOpen] = useState(false);
 
-  const handleDeleteMember = async (memberId: string) => {
-    if (!window.confirm("Are you sure you want to delete this team member?")) {
+  const handleDeleteMember = (member: TeamMember) => {
+    if (!teamData) return;
+
+    if (teamData.teamMembers.length <= 3) {
+      setIsMinMembersDialogOpen(true);
       return;
     }
 
+    setMemberToDelete(member);
+    setIsConfirmDialogOpen(true);
+  };
+
+  const confirmDeleteMember = async () => {
+    if (!memberToDelete || !teamData) return;
+
+    if (teamData.teamMembers.length <= 3) {
+      toast.error("Cannot delete member: A team must have at least 3 members.");
+      setIsConfirmDialogOpen(false);
+      setMemberToDelete(null);
+      return;
+    }
+
+    if (memberToDelete.role === "leader") {
+      toast.error("Cannot delete the team leader.");
+      setIsConfirmDialogOpen(false);
+      setMemberToDelete(null);
+      return;
+    }
+
+    setIsDeleting(true);
     try {
-      const response = await fetch(`/api/team-members/${memberId}`, {
+      const response = await fetch(`/api/team-members/${memberToDelete.id}`, {
         method: "DELETE",
       });
 
       if (response.ok) {
         toast.success("Team member deleted successfully!");
         fetchTeamDetails(); // Refresh the team data
+        setIsConfirmDialogOpen(false);
+        setMemberToDelete(null);
       } else {
         const errorData = await response.json();
         toast.error(errorData.message || "Failed to delete team member.");
@@ -79,6 +119,8 @@ export default function DashboardPage() {
     } catch (error) {
       console.error("Error deleting team member:", error);
       toast.error("An unexpected error occurred while deleting the member.");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -227,8 +269,7 @@ export default function DashboardPage() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => handleDeleteMember(teamLeader.id)}
-                  disabled
+                  onClick={() => handleDeleteMember(teamLeader)}
                 >
                   <Trash2 className="h-4 w-4 text-red-500" />
                 </Button>
@@ -248,7 +289,7 @@ export default function DashboardPage() {
               </p>
               <p className="flex items-center gap-2">
                 <Shirt className="h-4 w-4 text-purple-500" />{" "}
-                <strong>T-Shirt Size:</strong> {teamLeader.tshirtSize}
+                <strong>T-Shirt Size:</strong> {teamLeader.tshirtSize.toUpperCase()}
               </p>
               {teamLeader.allergies && (
                 <p className="flex items-center gap-2">
@@ -282,7 +323,7 @@ export default function DashboardPage() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => handleDeleteMember(member.id)}
+                    onClick={() => handleDeleteMember(member)}
                   >
                     <Trash2 className="h-4 w-4 text-red-500" />
                   </Button>
@@ -302,7 +343,7 @@ export default function DashboardPage() {
                 </p>
                 <p className="flex items-center gap-2">
                   <Shirt className="h-4 w-4 text-purple-500" />{" "}
-                  <strong>T-Shirt Size:</strong> {member.tshirtSize}
+                  <strong>T-Shirt Size:</strong> {member.tshirtSize.toUpperCase()}
                 </p>
                 {member.allergies && (
                   <p className="flex items-center gap-2">
@@ -380,6 +421,47 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete {memberToDelete?.fullName} from your team?
+              This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline" disabled={isDeleting}>Cancel</Button>
+            </DialogClose>
+            <Button onClick={confirmDeleteMember} disabled={isDeleting}>
+              {isDeleting ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="mr-2 h-4 w-4" />
+              )}
+              {isDeleting ? "Deleting..." : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isMinMembersDialogOpen} onOpenChange={setIsMinMembersDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cannot Delete Member</DialogTitle>
+            <DialogDescription>
+              A team must have at least 3 members. You cannot delete this member.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button>Okay</Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

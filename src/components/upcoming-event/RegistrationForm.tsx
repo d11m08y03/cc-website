@@ -30,6 +30,7 @@ import {
   ArrowLeft,
   Upload,
   Pencil,
+  Loader2,
 } from "lucide-react";
 import { z } from "zod";
 import { signIn, useSession } from "next-auth/react";
@@ -228,12 +229,12 @@ const MemberForm = ({
                 <SelectValue placeholder="Select T-shirt size" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="xs">XS</SelectItem>
-                <SelectItem value="s">S</SelectItem>
-                <SelectItem value="m">M</SelectItem>
-                <SelectItem value="l">L</SelectItem>
-                <SelectItem value="xl">XL</SelectItem>
-                <SelectItem value="xxl">XXL</SelectItem>
+                <SelectItem value="XS">XS</SelectItem>
+                <SelectItem value="S">S</SelectItem>
+                <SelectItem value="M">M</SelectItem>
+                <SelectItem value="L">L</SelectItem>
+                <SelectItem value="XL">XL</SelectItem>
+                <SelectItem value="XXL">XXL</SelectItem>
               </SelectContent>
             </Select>
             {errors?.tshirtSize && (
@@ -320,7 +321,7 @@ const Step3 = ({ prevStep, nextStep, setProjectFile, setProjectFileName }: any) 
   );
 };
 
-const Step4 = ({ prevStep, handleSubmit }: any) => (
+const Step4 = ({ prevStep, handleSubmit, isLoading }: any) => (
   <div className="w-full pt-4 flex flex-col items-center justify-center text-center p-4">
     <CheckCircle className="w-16 h-16 text-green-500 mb-4" />
     <h2 className="text-2xl font-semibold mb-2">Confirm Your Registration</h2>
@@ -328,10 +329,17 @@ const Step4 = ({ prevStep, handleSubmit }: any) => (
       Please confirm your registration. You will be able to edit your information at any time after registration.
     </p>
     <div className="p-4 border-t flex justify-between w-full mt-auto">
-      <Button onClick={prevStep}>
+      <Button onClick={prevStep} disabled={isLoading}>
         <ArrowLeft className="w-4 h-4" />
       </Button>
-      <Button onClick={handleSubmit}>Confirm and Register</Button>
+      <Button onClick={handleSubmit} disabled={isLoading}>
+        {isLoading ? (
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+        ) : (
+          <CheckCircle className="mr-2 h-4 w-4" />
+        )}
+        {isLoading ? "Registering..." : "Confirm and Register"}
+      </Button>
     </div>
   </div>
 );
@@ -349,6 +357,8 @@ export function RegistrationForm() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [hasRegisteredTeam, setHasRegisteredTeam] = useState(false);
   const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isClientLoaded, setIsClientLoaded] = useState(false);
 
   useEffect(() => {
     const checkRegistrationStatus = async () => {
@@ -365,9 +375,12 @@ export function RegistrationForm() {
         } catch (error) {
           console.error("Error fetching registration status:", error);
           setHasRegisteredTeam(false);
+        } finally {
+          setIsClientLoaded(true);
         }
       } else {
         setHasRegisteredTeam(false);
+        setIsClientLoaded(true);
       }
     };
 
@@ -439,6 +452,7 @@ export function RegistrationForm() {
   const handleSubmit = async () => {
     if (!validateStep()) return;
 
+    setIsLoading(true);
     const teamData = {
       teamDetails: {
         teamName,
@@ -471,6 +485,8 @@ export function RegistrationForm() {
     } catch (error) {
       console.error("Error submitting form:", error);
       toast.error("An unexpected error occurred.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -519,6 +535,7 @@ export function RegistrationForm() {
             projectFileName: projectFileName,
             }}
             handleSubmit={handleSubmit}
+            isLoading={isLoading}
           />
         );
       default:
@@ -566,7 +583,11 @@ export function RegistrationForm() {
     <>
       <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
         <DialogTrigger asChild>
-          {hasRegisteredTeam ? (
+          {!isClientLoaded ? (
+            <Button className="w-full cursor-pointer" disabled>
+              Loading...
+            </Button>
+          ) : hasRegisteredTeam ? (
             <Button asChild className="w-full cursor-pointer">
               <Link href="/dashboard">Go to Dashboard</Link>
             </Button>
@@ -580,6 +601,7 @@ export function RegistrationForm() {
           <NeonGradientCard neonColors={neonColor}>
             <div className="p-4">
               <DialogHeader className="flex flex-row justify-between items-center w-full">
+                <DialogTitle className="sr-only">Event Registration Form</DialogTitle>
                 <span className="text-lg font-semibold">
                   {step === 2
                     ? `Member ${currentMember + 1} of ${numPeople}`

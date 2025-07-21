@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Pencil } from "lucide-react";
+import { Pencil, Loader2 } from "lucide-react";
 
 const memberSchema = z.object({
   fullName: z.string().min(1, "This field cannot be blank"),
@@ -63,6 +63,7 @@ export function EditTeamMemberForm({
     role: memberData.role,
   });
   const [errors, setErrors] = useState<z.ZodFormattedError<z.infer<typeof memberSchema>> | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setFormData({
@@ -96,6 +97,7 @@ export function EditTeamMemberForm({
     }
     setErrors(null);
 
+    setIsLoading(true);
     try {
       const response = await fetch(`/api/team-members/${memberData.id}`, {
         method: "PUT",
@@ -116,6 +118,8 @@ export function EditTeamMemberForm({
     } catch (error) {
       console.error("Error updating team member:", error);
       toast.error("An unexpected error occurred.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -196,12 +200,12 @@ export function EditTeamMemberForm({
                   <SelectValue placeholder="Select T-shirt size" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="xs">XS</SelectItem>
-                  <SelectItem value="s">S</SelectItem>
-                  <SelectItem value="m">M</SelectItem>
-                  <SelectItem value="l">L</SelectItem>
-                  <SelectItem value="xl">XL</SelectItem>
-                  <SelectItem value="xxl">XXL</SelectItem>
+                  <SelectItem value="XS">XS</SelectItem>
+                <SelectItem value="S">S</SelectItem>
+                <SelectItem value="M">M</SelectItem>
+                <SelectItem value="L">L</SelectItem>
+                <SelectItem value="XL">XL</SelectItem>
+                <SelectItem value="XXL">XXL</SelectItem>
                 </SelectContent>
               </Select>
               {errors?.tshirtSize && <p className="text-red-500 text-xs mt-1">{errors.tshirtSize._errors[0]}</p>}
@@ -213,7 +217,14 @@ export function EditTeamMemberForm({
             <Input id="allergies" placeholder="if any" value={formData.allergies} onChange={handleChange} className="col-span-3" />
           </div>
 
-          <Button type="submit" className="w-full mt-4">Update Member</Button>
+          <Button type="submit" className="w-full mt-4" disabled={isLoading}>
+            {isLoading ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Pencil className="mr-2 h-4 w-4" />
+            )}
+            {isLoading ? "Updating..." : "Update Member"}
+          </Button>
         </form>
       </DialogContent>
     </Dialog>

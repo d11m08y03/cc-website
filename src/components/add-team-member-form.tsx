@@ -8,6 +8,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,7 +24,7 @@ import {
 import { toast } from "sonner";
 import { z } from "zod";
 import { useSession } from "next-auth/react";
-import { UserPlus } from "lucide-react";
+import { UserPlus, Loader2 } from "lucide-react";
 
 const memberSchema = z.object({
   fullName: z.string().min(1, "This field cannot be blank"),
@@ -58,6 +61,8 @@ export function AddTeamMemberForm({
     role: "member", // Default role, not user-selectable
   });
   const [errors, setErrors] = useState<z.ZodFormattedError<z.infer<typeof memberSchema>> | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isMaxMembersDialogOpen, setIsMaxMembersDialogOpen] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
@@ -79,6 +84,7 @@ export function AddTeamMemberForm({
     }
     setErrors(null);
 
+    setIsLoading(true);
     try {
       const response = await fetch("/api/team-members", {
         method: "POST",
@@ -108,6 +114,8 @@ export function AddTeamMemberForm({
     } catch (error) {
       console.error("Error adding team member:", error);
       toast.error("An unexpected error occurred.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -125,92 +133,117 @@ export function AddTeamMemberForm({
       });
       setErrors(null);
     } else if (currentMemberCount >= 5) {
-      toast.error("A team cannot have more than 5 members.");
+      setIsMaxMembersDialogOpen(true);
       return; // Prevent dialog from opening
     }
     setIsDialogOpen(open);
   };
 
   return (
-    <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <Button variant="ghost" className="flex-1 text-2xl font-bold">
-          <UserPlus className="h-8 w-8 mr-4" /> Add Team Member
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>Add New Team Member</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="fullName" className="text-right">Full Name</Label>
-            <div className="col-span-3">
-              <Input id="fullName" value={formData.fullName} onChange={handleChange} />
-              {errors?.fullName && <p className="text-red-500 text-xs mt-1">{errors.fullName._errors[0]}</p>}
+    <>
+      <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
+        <DialogTrigger asChild>
+          <Button variant="ghost" className="flex-1 text-2xl font-bold">
+            <UserPlus className="h-8 w-8 mr-4" /> Add Team Member
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Add New Team Member</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="fullName" className="text-right">Full Name</Label>
+              <div className="col-span-3">
+                <Input id="fullName" value={formData.fullName} onChange={handleChange} />
+                {errors?.fullName && <p className="text-red-500 text-xs mt-1">{errors.fullName._errors[0]}</p>}
+              </div>
             </div>
-          </div>
 
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="email" className="text-right">Email</Label>
-            <div className="col-span-3">
-              <Input id="email" type="email" value={formData.email} onChange={handleChange} />
-              {errors?.email && <p className="text-red-500 text-xs mt-1">{errors.email._errors[0]}</p>}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="email" className="text-right">Email</Label>
+              <div className="col-span-3">
+                <Input id="email" type="email" value={formData.email} onChange={handleChange} />
+                {errors?.email && <p className="text-red-500 text-xs mt-1">{errors.email._errors[0]}</p>}
+              </div>
             </div>
-          </div>
 
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="contactNumber" className="text-right">Contact Number</Label>
-            <div className="col-span-3">
-              <Input id="contactNumber" value={formData.contactNumber} onChange={handleChange} />
-              {errors?.contactNumber && <p className="text-red-500 text-xs mt-1">{errors.contactNumber._errors[0]}</p>}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="contactNumber" className="text-right">Contact Number</Label>
+              <div className="col-span-3">
+                <Input id="contactNumber" value={formData.contactNumber} onChange={handleChange} />
+                {errors?.contactNumber && <p className="text-red-500 text-xs mt-1">{errors.contactNumber._errors[0]}</p>}
+              </div>
             </div>
-          </div>
 
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="foodPreference" className="text-right">Food Preference</Label>
-            <div className="col-span-3">
-              <Select value={formData.foodPreference} onValueChange={(value) => handleSelectChange("foodPreference", value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select food preference" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="veg">Veg</SelectItem>
-                  <SelectItem value="non-veg">Non-Veg</SelectItem>
-                </SelectContent>
-              </Select>
-              {errors?.foodPreference && <p className="text-red-500 text-xs mt-1">{errors.foodPreference._errors[0]}</p>}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="foodPreference" className="text-right">Food Preference</Label>
+              <div className="col-span-3">
+                <Select value={formData.foodPreference} onValueChange={(value) => handleSelectChange("foodPreference", value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select food preference" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="veg">Veg</SelectItem>
+                    <SelectItem value="non-veg">Non-Veg</SelectItem>
+                  </SelectContent>
+                </Select>
+                {errors?.foodPreference && <p className="text-red-500 text-xs mt-1">{errors.foodPreference._errors[0]}</p>}
+              </div>
             </div>
-          </div>
 
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="tshirtSize" className="text-right">T-Shirt Size</Label>
-            <div className="col-span-3">
-              <Select value={formData.tshirtSize} onValueChange={(value) => handleSelectChange("tshirtSize", value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select T-shirt size" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="xs">XS</SelectItem>
-                  <SelectItem value="s">S</SelectItem>
-                  <SelectItem value="m">M</SelectItem>
-                  <SelectItem value="l">L</SelectItem>
-                  <SelectItem value="xl">XL</SelectItem>
-                  <SelectItem value="xxl">XXL</SelectItem>
-                </SelectContent>
-              </Select>
-              {errors?.tshirtSize && <p className="text-red-500 text-xs mt-1">{errors.tshirtSize._errors[0]}</p>}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="tshirtSize" className="text-right">T-Shirt Size</Label>
+              <div className="col-span-3">
+                <Select value={formData.tshirtSize} onValueChange={(value) => handleSelectChange("tshirtSize", value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select T-shirt size" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="XS">XS</SelectItem>
+                  <SelectItem value="S">S</SelectItem>
+                  <SelectItem value="M">M</SelectItem>
+                  <SelectItem value="L">L</SelectItem>
+                  <SelectItem value="XL">XL</SelectItem>
+                  <SelectItem value="XXL">XXL</SelectItem>
+                  </SelectContent>
+                </Select>
+                {errors?.tshirtSize && <p className="text-red-500 text-xs mt-1">{errors.tshirtSize._errors[0]}</p>}
+              </div>
             </div>
-          </div>
 
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="allergies" className="text-right">Allergies</Label>
-            <Input id="allergies" placeholder="if any" value={formData.allergies} onChange={handleChange} className="col-span-3" />
-          </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="allergies" className="text-right">Allergies</Label>
+              <Input id="allergies" placeholder="if any" value={formData.allergies} onChange={handleChange} className="col-span-3" />
+            </div>
 
-          <Button type="submit" className="w-full mt-4">Add Member</Button>
-        </form>
-      </DialogContent>
-    </Dialog>
+            <Button type="submit" className="w-full mt-4" disabled={isLoading}>
+              {isLoading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <UserPlus className="mr-2 h-4 w-4" />
+              )}
+              {isLoading ? "Adding..." : "Add Member"}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isMaxMembersDialogOpen} onOpenChange={setIsMaxMembersDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cannot Add Member</DialogTitle>
+          </DialogHeader>
+          <DialogDescription>
+            A team cannot have more than 5 members.
+          </DialogDescription>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button>Okay</Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
