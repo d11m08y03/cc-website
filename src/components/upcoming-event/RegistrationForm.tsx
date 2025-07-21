@@ -344,7 +344,7 @@ const Step3 = ({
 };
 
 const Step4 = ({ prevStep, handleSubmit, isLoading }: any) => (
-  <div className="w-full pt-4 flex flex-col items-center justify-center text-center p-4">
+  <div className="w-full pt-4 flex flex-col items-center justify-center text-center">
     <CheckCircle className="w-16 h-16 text-green-500 mb-4" />
     <h2 className="text-2xl font-semibold mb-2">Confirm Your Registration</h2>
     <p className="text-lg mb-4">

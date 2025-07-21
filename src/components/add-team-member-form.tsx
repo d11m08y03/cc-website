@@ -152,7 +152,7 @@ export function AddTeamMemberForm({
             <DialogTitle>Add New Team Member</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-4">
               <Label htmlFor="fullName" className="text-right">Full Name</Label>
               <div className="col-span-3">
                 <Input id="fullName" value={formData.fullName} onChange={handleChange} />
@@ -160,7 +160,7 @@ export function AddTeamMemberForm({
               </div>
             </div>
 
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-4">
               <Label htmlFor="email" className="text-right">Email</Label>
               <div className="col-span-3">
                 <Input id="email" type="email" value={formData.email} onChange={handleChange} />
@@ -168,7 +168,7 @@ export function AddTeamMemberForm({
               </div>
             </div>
 
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-4">
               <Label htmlFor="contactNumber" className="text-right">Contact Number</Label>
               <div className="col-span-3">
                 <Input id="contactNumber" value={formData.contactNumber} onChange={handleChange} />
@@ -176,7 +176,7 @@ export function AddTeamMemberForm({
               </div>
             </div>
 
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-4">
               <Label htmlFor="foodPreference" className="text-right">Food Preference</Label>
               <div className="col-span-3">
                 <Select value={formData.foodPreference} onValueChange={(value) => handleSelectChange("foodPreference", value)}>
@@ -192,7 +192,7 @@ export function AddTeamMemberForm({
               </div>
             </div>
 
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-4">
               <Label htmlFor="tshirtSize" className="text-right">T-Shirt Size</Label>
               <div className="col-span-3">
                 <Select value={formData.tshirtSize} onValueChange={(value) => handleSelectChange("tshirtSize", value)}>
@@ -212,7 +212,7 @@ export function AddTeamMemberForm({
               </div>
             </div>
 
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-4">
               <Label htmlFor="allergies" className="text-right">Allergies</Label>
               <Input id="allergies" placeholder="if any" value={formData.allergies} onChange={handleChange} className="col-span-3" />
             </div>

@@ -116,7 +116,7 @@ export function ChangeProposalForm({
           <DialogTitle>Change Project Proposal</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-4">
             <Label htmlFor="project-file" className="text-right">
               <Upload className="w-4 h-4 mr-2 inline" /> Upload New Proposal
             </Label>

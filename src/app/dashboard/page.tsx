@@ -402,7 +402,7 @@ export default function DashboardPage() {
 
         {/* New Button Card */}
         <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 lg:col-span-2 flex flex-col items-center justify-center p-4">
-          <CardContent className="w-full h-full flex flex-row items-center justify-center gap-4 p-0">
+          <CardContent className="w-full h-full flex flex-col md:flex-row items-center justify-center gap-4 p-0">
             {teamData && (
               <ChangeProposalForm
                 teamId={teamData.id}
