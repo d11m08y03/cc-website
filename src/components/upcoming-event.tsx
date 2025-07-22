@@ -28,7 +28,7 @@ export function UpcomingEventsSection() {
     { logo: "/Sponsors/iteligence_logo.png", alt: "MU Swan" },
   ];
 
-  // Countdown timer logic
+
   const eventStart = new Date("2025-08-19T09:09:30");
   const [timeLeft, setTimeLeft] = useState<{
     days: number;
@@ -87,7 +87,7 @@ export function UpcomingEventsSection() {
             <div>
               {/* Beautiful Countdown Timer (md and up only) */}
               <div className="hidden md:flex flex-col items-center mb-6">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-red-500 to-pink-400 shadow-lg mb-2">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-red-500 to-red-900 shadow-lg mb-2">
                   <Clock className="w-5 h-5 text-white" />
                   <span className="text-white font-semibold text-base tracking-wide">
                     Countdown to Event
