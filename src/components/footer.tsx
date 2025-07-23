@@ -8,7 +8,7 @@ export default function Footer() {
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <span>Contact:</span>
           <a href="tel:+23054293085" className="hover:underline text-blue-600 dark:text-blue-400">5429 3085</a>
-          <span>or</span>
+          <span>|</span>
           <a href="tel:+23058375642" className="hover:underline text-blue-600 dark:text-blue-400">5837 5642</a>
         </div>
         <div className="flex gap-4">
