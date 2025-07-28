@@ -7,24 +7,28 @@ import { handlers } from "@/lib/auth";
 
 export async function PATCH(
 	request: Request,
-	{ params }: { params: { userId: string } }
+	{ params }: { params: Promise<{ userId: string }> },
 ) {
 	try {
 		const session = await getServerSession(handlers);
 
-		if (!session?.user?.email) {
-			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+		// @ts-ignore
+		if (!session || !session.user || !session.user.email) {
+			return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 		}
 
+		// @ts-ignore
+		const userEmail = session.user.email;
+
 		const adminUser = await db.query.users.findFirst({
-			where: eq(users.email, session.user.email),
+			where: eq(users.email, userEmail),
 		});
 
 		if (!adminUser || !adminUser.isAdmin) {
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 		}
 
-		const userId = params.userId;
+		const userId = (await params).userId;
 		const { isJudge } = await request.json();
 
 		if (!userId) {

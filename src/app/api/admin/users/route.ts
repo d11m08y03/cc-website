@@ -9,12 +9,16 @@ export async function GET() {
 	try {
 		const session = await getServerSession(handlers);
 
-		if (!session?.user?.email) {
-			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+		// @ts-ignore
+		if (!session || !session.user || !session.user.email) {
+			return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 		}
 
+		// @ts-ignore
+		const userEmail = session.user.email;
+
 		const user = await db.query.users.findFirst({
-			where: eq(users.email, session.user.email),
+			where: eq(users.email, userEmail),
 		});
 
 		if (!user || !user.isAdmin) {

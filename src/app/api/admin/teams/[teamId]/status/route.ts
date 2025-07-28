@@ -6,54 +6,58 @@ import { users, teamDetails } from "@/db/postgres/schema";
 import { eq } from "drizzle-orm";
 
 export async function PATCH(
-  request: Request,
-  { params }: { params: { teamId: string } }
+	request: Request,
+	{ params }: { params: Promise<{ teamId: string }> },
 ) {
-  try {
-    const session = await getServerSession(handlers);
+	try {
+		const session = await getServerSession(handlers);
 
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+		// @ts-ignore
+		if (!session || !session.user || !session.user.email) {
+			return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+		}
 
-    const adminUser = await db.query.users.findFirst({
-      where: eq(users.email, session.user.email),
-    });
+		// @ts-ignore
+		const userEmail = session.user.email;
 
-    if (!adminUser || !adminUser.isAdmin) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+		const adminUser = await db.query.users.findFirst({
+			where: eq(users.email, userEmail),
+		});
 
-    const teamId = params.teamId;
-    const { status } = await request.json();
+		if (!adminUser || !adminUser.isAdmin) {
+			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+		}
 
-    if (!teamId || !status) {
-      return NextResponse.json({ error: "Team ID and status are required" }, { status: 400 });
-    }
+		const teamId = (await params).teamId;
+		const { status } = await request.json();
 
-    if (!["pending", "approved", "rejected"].includes(status)) {
-      return NextResponse.json({ error: "Invalid status" }, { status: 400 });
-    }
+		if (!teamId || !status) {
+			return NextResponse.json({ error: "Team ID and status are required" }, { status: 400 });
+		}
 
-    const team = await db.query.teamDetails.findFirst({
-      where: eq(teamDetails.id, teamId),
-    });
+		if (!["pending", "approved", "rejected"].includes(status)) {
+			return NextResponse.json({ error: "Invalid status" }, { status: 400 });
+		}
 
-    if (!team) {
-      return NextResponse.json({ error: "Team not found" }, { status: 404 });
-    }
+		const team = await db.query.teamDetails.findFirst({
+			where: eq(teamDetails.id, teamId),
+		});
 
-    await db
-      .update(teamDetails)
-      .set({ approvalStatus: status })
-      .where(eq(teamDetails.id, teamId));
+		if (!team) {
+			return NextResponse.json({ error: "Team not found" }, { status: 404 });
+		}
 
-    return NextResponse.json({ message: `Team status updated to ${status}` });
-  } catch (error) {
-    console.error("Error updating team status:", error);
-    return NextResponse.json(
-      { error: "Internal Server Error", details: (error as Error).message },
-      { status: 500 }
-    );
-  }
+		await db
+			.update(teamDetails)
+			.set({ approvalStatus: status })
+			.where(eq(teamDetails.id, teamId));
+
+		return NextResponse.json({ message: `Team status updated to ${status}` });
+	} catch (error) {
+		console.error("Error updating team status:", error);
+		return NextResponse.json(
+			{ error: "Internal Server Error", details: (error as Error).message },
+			{ status: 500 }
+		);
+	}
 }
