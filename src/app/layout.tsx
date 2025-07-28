@@ -33,7 +33,7 @@ export default function RootLayout({
 				<link rel="icon" href="/favicon_cc.ico" type="image/x-icon" />
 			</head>
 			<body
-				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+				className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
 			>
 				<ThemeProvider
 					attribute="class"
@@ -42,13 +42,15 @@ export default function RootLayout({
 					disableTransitionOnChange
 				>
 					<AuthProvider>
-						<div className="container mx-auto max-w-screen-xl">
-							<Navbar />
-							<main className="px-4 py-8">
-								{children}
-								<Footer />
-							</main>
+						<div className="flex-grow">
+							<div className="container mx-auto max-w-screen-xl">
+								<Navbar />
+								<main className="px-4 py-8">
+									{children}
+								</main>
+							</div>
 						</div>
+						<Footer />
 					</AuthProvider>
 				</ThemeProvider>
 				<Toaster />

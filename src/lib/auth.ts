@@ -2,6 +2,8 @@ import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { db } from "@/db/client";
+import { users } from "@/db/postgres/schema";
+import { eq } from "drizzle-orm";
 
 export const handlers = NextAuth({
   adapter: DrizzleAdapter(db),
@@ -26,6 +28,18 @@ export const handlers = NextAuth({
         // @ts-expect-error - Augmenting the user object
         token.isAdmin = user.isAdmin; // Persist the isAdmin flag
       }
+      
+      // Refresh the token with the latest user data from the database
+      if (token.id) {
+        const dbUser = await db.query.users.findFirst({
+          where: eq(users.id, token.id as string),
+        });
+        if (dbUser) {
+          // @ts-expect-error
+          token.isAdmin = dbUser.isAdmin;
+        }
+      }
+
       return token;
     },
 

@@ -18,6 +18,7 @@ export const users = pgTable("user", {
 	email: text("email").unique(),
 	isAdmin: boolean("isAdmin").default(false),
 	isJudge: boolean("isJudge").default(false),
+	createdAt: timestamp("created_at").default(sql`now()`), // New createdAt column
 	emailVerified: timestamp("emailVerified", { mode: "date" }),
 	image: text("image"),
 })
@@ -105,6 +106,7 @@ export const teamDetails = pgTable(
 		teamName: text("team_name").notNull(),
 		projectFile: text("project_file"),
 		projectFileName: text("project_file_name"),
+		createdAt: timestamp("created_at").default(sql`now()`),
 		userId: text("user_id")
 			.notNull()
 			.references(() => users.id, { onDelete: "cascade" }),

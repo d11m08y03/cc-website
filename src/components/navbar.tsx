@@ -82,6 +82,11 @@ export function Navbar() {
 					</>
 				)}
 				<ThemeToggle />
+				{status === "authenticated" && session.user.isAdmin && (
+					<Button variant="ghost" asChild className="px-2 md:px-4">
+						<Link href="/admin">Admin</Link>
+					</Button>
+				)}
 				{status === "authenticated" ? (
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
