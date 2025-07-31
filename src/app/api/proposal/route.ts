@@ -9,6 +9,14 @@ export async function GET(req: NextRequest) {
     const status = url.searchParams.get("status") || "all";
 
     const proposals = await db.query.teamDetails.findMany({
+      columns: {
+        id: true,
+        teamName: true,
+        projectFileName: true,
+        createdAt: true,
+        userId: true,
+        approvalStatus: true,
+      },
       where: status === "all" ? undefined : eq(teamDetails.approvalStatus, status),
       with: {
         teamMembers: true,

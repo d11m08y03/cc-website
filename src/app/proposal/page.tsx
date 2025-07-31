@@ -43,6 +43,7 @@ export default function ProposalPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(false);
+  const [viewing, setViewing] = useState(false);
   const [stats, setStats] = useState<Stats>({ total: 0, pending: 0, approved: 0, rejected: 0 });
   const [isMobile, setIsMobile] = useState(false);
 
@@ -112,11 +113,16 @@ export default function ProposalPage() {
     setLoading(false);
   };
 
-  const viewProposal = () => {
+  const viewProposal = async () => {
+    setViewing(true);
     const proposal = proposals[currentIndex];
-    if (proposal.projectFile) {
+    const res = await fetch(`/api/proposal/${proposal.id}`);
+    const data = await res.json();
+    const projectFile = data.projectFile;
+
+    if (projectFile) {
       // Remove the data URI prefix if it exists
-      const base64String = proposal.projectFile.split(',')[1] || proposal.projectFile;
+      const base64String = projectFile.split(',')[1] || projectFile;
       try {
         const byteCharacters = atob(base64String);
         const byteNumbers = new Array(byteCharacters.length);
@@ -132,6 +138,7 @@ export default function ProposalPage() {
         alert("Failed to open PDF. The file may be corrupt or improperly formatted.");
       }
     }
+    setViewing(false);
   }
 
   const handleNext = () => {
@@ -259,7 +266,7 @@ export default function ProposalPage() {
               <CardContent className="flex gap-4">
                 <Button onClick={handlePrevious} disabled={loading || currentIndex === 0} className="w-28"><ArrowLeft className="h-5 w-5 mr-2" />Previous</Button>
                 <Button onClick={handleNext} disabled={loading || currentIndex === proposals.length - 1} className="w-28"><ArrowRight className="h-5 w-5 mr-2" />Next</Button>
-                <Button onClick={viewProposal} disabled={loading}><FileText className="h-5 w-5 mr-2" />View Proposal</Button>
+                <Button onClick={viewProposal} disabled={viewing || loading}><FileText className="h-5 w-5 mr-2" />{viewing ? <Loader2 className="h-5 w-5 animate-spin" /> : 'View Proposal'}</Button>
                 {proposals[currentIndex].approvalStatus === 'pending' ? (
                   <>
                     <Button variant="success" onClick={() => handleStatusUpdate('approved')} disabled={loading} className="w-28">
