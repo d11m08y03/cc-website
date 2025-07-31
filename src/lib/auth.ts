@@ -27,6 +27,8 @@ export const handlers = NextAuth({
 				token.id = user.id; // Persist the user's ID in the token
 				// @ts-expect-error - Augmenting the user object
 				token.isAdmin = user.isAdmin; // Persist the isAdmin flag
+				// @ts-expect-error - Augmenting the user object
+				token.isJudge = user.isJudge; // Persist the isJudge flag
 			}
 
 			// Refresh the token with the latest user data from the database
@@ -36,6 +38,7 @@ export const handlers = NextAuth({
 				});
 				if (dbUser) {
 					token.isAdmin = dbUser.isAdmin;
+					token.isJudge = dbUser.isJudge;
 				}
 			}
 
@@ -50,6 +53,7 @@ export const handlers = NextAuth({
 			if (session.user) {
 				session.user.id = token.id as string;
 				session.user.isAdmin = token.isAdmin as boolean;
+				session.user.isJudge = token.isJudge as boolean;
 			}
 			return session;
 		},

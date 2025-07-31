@@ -201,11 +201,11 @@ export function AddTeamMemberForm({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="XS">XS</SelectItem>
-                  <SelectItem value="S">S</SelectItem>
-                  <SelectItem value="M">M</SelectItem>
-                  <SelectItem value="L">L</SelectItem>
-                  <SelectItem value="XL">XL</SelectItem>
-                  <SelectItem value="XXL">XXL</SelectItem>
+                    <SelectItem value="S">S</SelectItem>
+                    <SelectItem value="M">M</SelectItem>
+                    <SelectItem value="L">L</SelectItem>
+                    <SelectItem value="XL">XL</SelectItem>
+                    <SelectItem value="XXL">XXL</SelectItem>
                   </SelectContent>
                 </Select>
                 {errors?.tshirtSize && <p className="text-red-500 text-xs mt-1">{errors.tshirtSize._errors[0]}</p>}
