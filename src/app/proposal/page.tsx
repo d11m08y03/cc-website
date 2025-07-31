@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from '@/components/ui/badge';
-import { Users, CheckCircle, XCircle, FileText, User, Loader2, List, Clock, Check, X, ChevronDown, ArrowLeft, ArrowRight, Undo2 } from 'lucide-react';
+import { Users, CheckCircle, XCircle, FileText, User, Loader2, List, Clock, Check, X, ChevronDown, ArrowLeft, ArrowRight, Undo2, Smartphone } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
@@ -44,6 +44,18 @@ export default function ProposalPage() {
   const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState<Stats>({ total: 0, pending: 0, approved: 0, rejected: 0 });
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -136,6 +148,16 @@ export default function ProposalPage() {
 
   if (status === 'loading' || !session?.user.isJudge) {
     return <div className="flex justify-center items-center h-screen"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+  }
+
+  if (isMobile) {
+    return (
+      <div className="flex flex-col justify-center items-center h-screen text-center">
+        <Smartphone className="h-16 w-16 mb-4" />
+        <h2 className="text-2xl font-bold mb-2">This page is best viewed on a larger screen.</h2>
+        <p>Please switch to a desktop or tablet for the best experience. Or else, the UI will self-destruct in 5 seconds.</p>
+      </div>
+    );
   }
 
   return (
