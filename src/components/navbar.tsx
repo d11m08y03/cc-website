@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
@@ -19,6 +19,18 @@ import { ThemeToggle } from "./theme-toggle";
 export function Navbar() {
 	const { data: session, status } = useSession();
 	const [hasRegisteredTeam, setHasRegisteredTeam] = useState(false);
+	const [isMobile, setIsMobile] = useState(false);
+
+	useEffect(() => {
+		const checkScreenSize = () => {
+			setIsMobile(window.innerWidth < 768);
+		};
+
+		checkScreenSize();
+		window.addEventListener('resize', checkScreenSize);
+
+		return () => window.removeEventListener('resize', checkScreenSize);
+	}, []);
 
 	useEffect(() => {
 		const checkRegistrationStatus = async () => {
@@ -85,6 +97,11 @@ export function Navbar() {
 				{status === "authenticated" && session.user.isAdmin && (
 					<Button variant="ghost" asChild className="px-2 md:px-4">
 						<Link href="/admin">Admin</Link>
+					</Button>
+				)}
+				{status === "authenticated" && session.user.isJudge && !isMobile && (
+					<Button variant="ghost" asChild className="px-2 md:px-4">
+						<Link href="/proposal">Proposals</Link>
 					</Button>
 				)}
 				{status === "authenticated" ? (
