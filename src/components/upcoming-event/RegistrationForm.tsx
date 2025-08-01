@@ -18,12 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { NeonGradientCard } from "@/components/magicui/neon-gradient-card";
 import {
-  User,
-  Users,
   FileText,
   CheckCircle,
   ArrowRight,
@@ -60,7 +56,7 @@ const Step1 = ({
 }: any) => (
   <div>
     <div className="flex items-center gap-2 mb-4 font-semibold text-lg">
-		Team Details
+      Team Details
     </div>
     <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-4">
       <Label htmlFor="team-name" className="h-full flex items-center justify-start sm:justify-end">
@@ -472,7 +468,7 @@ export function RegistrationForm() {
     }
   };
 
-	const router = useRouter();
+  const router = useRouter();
 
   const handleSubmit = async () => {
     if (!validateStep()) return;
@@ -607,43 +603,22 @@ export function RegistrationForm() {
 
   return (
     <>
-      <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
-        <DialogTrigger asChild>
-          {!isClientLoaded ? (
-            <Button className="w-full cursor-pointer" disabled>
-              Loading...
-            </Button>
-          ) : hasRegisteredTeam ? (
-            <Button asChild className="w-full cursor-pointer">
-              <Link href="/dashboard">Go to Dashboard</Link>
-            </Button>
-          ) : (
-            <Button
-              className="w-full cursor-pointer"
-              disabled={status === "loading"}
-            >
-              Register Now
-            </Button>
-          )}
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[600px] p-0">
-          <NeonGradientCard neonColors={neonColor}>
-            <div className="p-4">
-              <DialogHeader className="flex flex-row justify-between items-center w-full">
-                <DialogTitle className="sr-only">
-                  Event Registration Form
-                </DialogTitle>
-                <span className="text-lg font-semibold">
-                  {step === 2
-                    ? `Member ${currentMember + 1} of ${numPeople}`
-                    : `Step ${step} of 4`}
-                </span>
-              </DialogHeader>
-              {renderStep()}
-            </div>
-          </NeonGradientCard>
-        </DialogContent>
-      </Dialog>
+      {!isClientLoaded ? (
+        <Button className="w-full cursor-pointer" disabled>
+          Loading...
+        </Button>
+      ) : hasRegisteredTeam ? (
+        <Button asChild className="w-full cursor-pointer">
+          <Link href="/dashboard">Go to Dashboard</Link>
+        </Button>
+      ) : (
+        <Button
+          className="w-full cursor-pointer"
+          disabled
+        >
+          Register Now
+        </Button>
+      )}
 
       <Dialog open={isLoginPromptOpen} onOpenChange={setIsLoginPromptOpen}>
         <DialogContent className="sm:max-w-[425px]">

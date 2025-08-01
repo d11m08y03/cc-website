@@ -105,37 +105,8 @@ export function ChangeProposalForm({
   };
 
   return (
-    <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <Button variant="ghost" className="flex-1 text-2xl font-bold">
-          <FileText className="h-8 w-8 mr-4" /> Change Proposal
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>Change Project Proposal</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="grid gap-4 py-4">
-          <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-4">
-            <Label htmlFor="project-file" className="text-right">
-              <Upload className="w-4 h-4 mr-2 inline" /> Upload New Proposal
-            </Label>
-            <Input
-              id="project-file"
-              type="file"
-              onChange={handleFileChange}
-              className="col-span-3"
-            />
-          </div>
-          {errors?.projectFile && <p className="text-red-500 text-xs mt-1">{errors.projectFile._errors[0]}</p>}
-          {projectFileName && (
-            <p className="text-sm text-muted-foreground text-center mt-2">
-              Current file: {projectFileName}
-            </p>
-          )}
-          <Button type="submit" className="w-full mt-4">Update Proposal</Button>
-        </form>
-      </DialogContent>
-    </Dialog>
+    <Button variant="ghost" className="flex-1 text-2xl font-bold" disabled>
+      <FileText className="h-8 w-8 mr-4" /> Change Proposal
+    </Button>
   );
 }
