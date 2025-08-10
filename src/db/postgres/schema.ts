@@ -135,6 +135,8 @@ export const teamMembers = pgTable("team_members", {
 	foodPreference: text("food_preference").notNull(),
 	tshirtSize: text("tshirt_size").notNull(),
 	allergies: text("allergies"),
+	present: boolean("present").default(false),
+	food: boolean("food").default(false),
 });
 
 export const accountRelations = relations(accounts, ({ one }) => ({
