@@ -14,6 +14,7 @@ export async function GET() {
 			})
 			.from(teamDetails)
 			.leftJoin(teamMembers, eq(teamMembers.teamId, teamDetails.id))
+			.where(eq(teamDetails.approvalStatus, "approved"))
 			.orderBy(asc(teamDetails.teamName), asc(teamMembers.fullName));
 
 		return NextResponse.json(results);
