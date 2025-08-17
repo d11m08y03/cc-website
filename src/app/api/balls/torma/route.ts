@@ -7,6 +7,7 @@ export async function GET() {
 	try {
 		const results = await db
 			.select({
+        id: teamDetails.id,
 				teamName: teamDetails.teamName,
 				fullName: teamMembers.fullName,
 				present: teamMembers.present,
