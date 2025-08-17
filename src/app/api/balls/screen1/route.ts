@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db/client";
-import { teamMembers } from "@/db/postgres/schema";
+import { teamMembers, teamDetails } from "@/db/postgres/schema";
 import { count, sql } from "drizzle-orm";
 
 export async function GET() {
@@ -9,13 +9,18 @@ export async function GET() {
 			.select({
 				total_members: count(),
 				present_members: count(
-					sql<number>`case when ${teamMembers.present} then 1 end`
+					sql<number>`CASE WHEN ${teamMembers.present} THEN 1 END`
 				),
 				members_with_food: count(
-					sql<number>`case when ${teamMembers.food} then 1 end`
+					sql<number>`CASE WHEN ${teamMembers.food} THEN 1 END`
 				),
 			})
-			.from(teamMembers);
+			.from(teamMembers)
+			.leftJoin(
+				teamDetails,
+				sql`${teamDetails.id} = ${teamMembers.teamId}`
+			)
+			.where(sql`${teamDetails.approvalStatus} = 'approved'`);
 
 		const stats = result[0];
 
